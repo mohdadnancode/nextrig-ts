@@ -4,34 +4,32 @@ import toast from "react-hot-toast";
 import api from "../api/client";
 
 import { useAuth } from "./AuthContext";
-import type { WishlistItem } from "../types/wishlist";
 import type { WishlistContextType } from "./context.types";
+import type { Product } from "../types/product";
 
 /* ------------------ Context ------------------ */
 
 export const WishlistContext = createContext<WishlistContextType | undefined>(
-  undefined,
+  undefined
 );
 
-/* ------------------ Provider Props ------------------ */
+/* ------------------ Provider ------------------ */
 
 type WishlistProviderProps = {
   children: ReactNode;
 };
 
-/* ------------------ Provider ------------------ */
-
 export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const { user, isAuthenticated } = useAuth();
 
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
   /* ------------------ Sync from auth ------------------ */
 
   useEffect(() => {
     if (isAuthenticated && Array.isArray(user?.wishlist)) {
-      setWishlist(user.wishlist as WishlistItem[]);
+      setWishlist(user.wishlist as Product[]);
     } else {
       setWishlist([]);
     }
@@ -39,9 +37,7 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
   /* ------------------ Sync to server ------------------ */
 
-  const syncWishlistToServer = async (
-    updatedWishlist: WishlistItem[],
-  ): Promise<void> => {
+  const syncWishlistToServer = async (updatedWishlist: Product[]) => {
     if (!user?.id) return;
 
     try {
@@ -50,8 +46,10 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
         updatedAt: new Date().toISOString(),
       });
 
-      const updatedUser = { ...user, wishlist: updatedWishlist };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...user, wishlist: updatedWishlist })
+      );
     } catch (error) {
       console.error("Failed to sync wishlist:", error);
     }
@@ -60,7 +58,7 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   /* ------------------ Actions ------------------ */
 
   const toggleWishlist: WishlistContextType["toggleWishlist"] = async (
-    product,
+    product
   ) => {
     if (!isAuthenticated) {
       toast.error("Please login to manage your wishlist");
@@ -71,18 +69,19 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
     try {
       const exists = wishlist.some((item) => item.id === product.id);
-      let updatedWishlist: WishlistItem[];
 
-      if (exists) {
-        updatedWishlist = wishlist.filter((item) => item.id !== product.id);
-        toast.success(`${product.name} removed from wishlist`);
-      } else {
-        updatedWishlist = [...wishlist, product];
-        toast.success(`${product.name} added to wishlist`);
-      }
+      const updatedWishlist = exists
+        ? wishlist.filter((item) => item.id !== product.id)
+        : [...wishlist, product];
 
       setWishlist(updatedWishlist);
       await syncWishlistToServer(updatedWishlist);
+
+      toast.success(
+        exists
+          ? `${product.name} removed from wishlist`
+          : `${product.name} added to wishlist`
+      );
     } catch (error) {
       console.error("Wishlist update failed:", error);
       toast.error("Error updating wishlist");
@@ -92,21 +91,13 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   };
 
   const removeFromWishlist: WishlistContextType["removeFromWishlist"] = async (
-    id,
+    id
   ) => {
     if (!isAuthenticated) return;
 
-    const removedItem = wishlist.find((item) => item.id === id);
     const updatedWishlist = wishlist.filter((item) => item.id !== id);
-
     setWishlist(updatedWishlist);
     await syncWishlistToServer(updatedWishlist);
-
-    if (removedItem) {
-      toast.success(`${removedItem.name} removed from wishlist`);
-    } else {
-      toast("Item removed from wishlist");
-    }
   };
 
   const clearWishlist: WishlistContextType["clearWishlist"] = async () => {
@@ -118,12 +109,10 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
   /* ------------------ Helpers ------------------ */
 
-  const isInWishlist = (id: string): boolean =>
+  const isInWishlist = (id: string) =>
     wishlist.some((item) => item.id === id);
 
   const wishlistCount = wishlist.length;
-
-  /* ------------------ Provider ------------------ */
 
   const value: WishlistContextType = {
     wishlist,

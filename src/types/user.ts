@@ -1,3 +1,14 @@
+import type { Order } from "./order";
+import type { Product } from "./product";
+
+export type Address = {
+  fullName: string;
+  address: string;
+  city: string;
+  pincode: string;
+  mobileNumber: string;
+};
+
 export type User = {
   id: string;
   username: string;
@@ -5,10 +16,12 @@ export type User = {
   password: string;
   role: "user" | "admin";
   profileImage: string;
-  address: unknown[];
-  cart: unknown[];
-  orders: unknown[];
-  wishlist: unknown[];
+
+  address: Address | null;
+  cart: Product[];
+  orders: Order[];
+  wishlist: Product[];
+
   createdAt: string;
   updatedAt: string;
   isBlocked: boolean;

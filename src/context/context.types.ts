@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { User } from "../types/user";
 import type { CartItem } from "../types/cart";
-import type { WishlistItem } from "../types/wishlist";
+import type { Product } from "../types/product";
 
 export type AuthContextType = {
   user: User | null;
@@ -37,8 +37,8 @@ export type CartContextType = {
 };
 
 export type WishlistContextType = {
-  wishlist: WishlistItem[];
-  toggleWishlist: (product: WishlistItem) => Promise<void>;
+  wishlist: Product[];
+  toggleWishlist: (product: Product) => Promise<void>;
   removeFromWishlist: (id: string) => Promise<void>;
   clearWishlist: () => Promise<void>;
   isInWishlist: (id: string) => boolean;
