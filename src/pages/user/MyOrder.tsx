@@ -53,9 +53,7 @@ const MyOrders: React.FC = () => {
     let result: Order[] = [...orders];
 
     if (statusFilter !== "all") {
-      result = result.filter(
-        (order) => order.status === statusFilter
-      );
+      result = result.filter((order) => order.status === statusFilter);
     }
 
     result.sort((a, b) => {
@@ -72,10 +70,7 @@ const MyOrders: React.FC = () => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
   };
 
-  const cancelOrder = async (
-    userId: string,
-    orderId: string
-  ) => {
+  const cancelOrder = async (userId: string, orderId: string) => {
     try {
       const res = await api.get(`/users/${userId}`);
       const userData = res.data;
@@ -88,7 +83,7 @@ const MyOrders: React.FC = () => {
               cancelledBy: "user",
               cancelledAt: new Date().toISOString(),
             }
-          : order
+          : order,
       );
 
       await api.patch(`/users/${userId}`, { orders: updatedOrders });
@@ -137,9 +132,7 @@ const MyOrders: React.FC = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-[#76b900] text-xl">
-          Loading your orders...
-        </div>
+        <div className="text-[#76b900] text-xl">Loading your orders...</div>
       </div>
     );
   }
@@ -217,7 +210,9 @@ const MyOrders: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "newest" | "oldest")}
+                onChange={(e) =>
+                  setSortBy(e.target.value as "newest" | "oldest")
+                }
                 className="bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-[#76b900]"
               >
                 <option value="newest" className="text-black">
@@ -229,7 +224,9 @@ const MyOrders: React.FC = () => {
               </select>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as StatusFilter)
+                }
                 className="bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white focus:border-[#76b900]"
               >
                 <option value="all" className="text-black">
@@ -337,10 +334,10 @@ const MyOrders: React.FC = () => {
                           order.status === "pending"
                             ? "w-1/3 bg-yellow-500"
                             : order.status === "shipped"
-                            ? "w-2/3 bg-blue-500"
-                            : order.status === "delivered"
-                            ? "w-full bg-green-500"
-                            : "w-0 bg-red-500"
+                              ? "w-2/3 bg-blue-500"
+                              : order.status === "delivered"
+                                ? "w-full bg-green-500"
+                                : "w-0 bg-red-500"
                         }`}
                       ></div>
                     </div>
@@ -381,7 +378,7 @@ const MyOrders: React.FC = () => {
                             <p className="text-[#76b900] font-semibold">
                               ₹
                               {(item.price * item.quantity).toLocaleString(
-                                "en-IN"
+                                "en-IN",
                               )}
                             </p>
                           </div>
@@ -451,9 +448,7 @@ const MyOrders: React.FC = () => {
                   <div className="mt-4 flex justify-end">
                     {order.status?.toLowerCase() === "pending" ? (
                       <button
-                        onClick={() =>
-                          cancelOrder(user.id, order.id)
-                        }
+                        onClick={() => cancelOrder(user.id, order.id)}
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_0_10px_#ff4444]"
                       >
                         Cancel Order

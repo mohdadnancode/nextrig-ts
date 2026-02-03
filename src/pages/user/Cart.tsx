@@ -13,13 +13,7 @@ import { Plus, Minus } from "lucide-react";
 const Cart: React.FC = () => {
   const navigate = useNavigate();
 
-  const {
-    cart,
-    clearCart,
-    cartCount,
-    totalPrice,
-    loading,
-  } = useCart();
+  const { cart, clearCart, cartCount, totalPrice, loading } = useCart();
 
   /* Loading state */
   if (loading) {
@@ -100,9 +94,7 @@ const Cart: React.FC = () => {
 
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-3">
-                      <span className="text-gray-400 text-sm">
-                        Quantity:
-                      </span>
+                      <span className="text-gray-400 text-sm">Quantity:</span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={decrease}

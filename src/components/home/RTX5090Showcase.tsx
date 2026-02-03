@@ -55,12 +55,12 @@ const GPUShowcase = ({
       <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/70 to-black/90" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col justify-center">
+       <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col justify-center">
         <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-2">
           {tagline}
         </p>
 
-        <h1 className="text-4xl md:text-6xl font-semibold text-gray-100 mb-4 leading-tight">
+        <h1 className="text-4xl md:text-6xl font-semibold text-gray-100 mb-4 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
           {model.split(" ")[0]}{" "}
           <span className="text-[#76b900]">
             {model.split(" ").slice(1).join(" ")}
@@ -74,7 +74,7 @@ const GPUShowcase = ({
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
             to="/products"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#76b900] text-black font-medium text-sm"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#76b900] text-black font-medium text-sm shadow-[0_0_25px_rgba(118,185,0,0.45)] hover:shadow-[0_0_45px_rgba(118,185,0,0.85)] transition-transform hover:-translate-y-0.5"
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
             Buy Now
@@ -92,16 +92,16 @@ const GPUShowcase = ({
       </div>
 
       {/* Specs */}
-      <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 bg-black/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6 animate-float max-w-55">
-        <h3 className="text-[#76b900] font-semibold mb-3 text-xs uppercase tracking-wider">
+      <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 bg-black/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6 shadow-[0_0_25px_rgba(118,185,0,0.15)] animate-float max-w-55 sm:max-w-none">
+        <h3 className="text-[#76b900] font-semibold mb-3 text-xs sm:text-sm uppercase tracking-wider">
           Key Specs
         </h3>
-        <ul className="space-y-2 text-gray-300 text-xs sm:text-sm">
+        <ul className="space-y-1 sm:space-y-2 text-gray-300 text-xs sm:text-sm">
           {specs.map((s, i) => {
             const Icon = s.icon;
             return (
               <li key={i} className="flex items-center gap-2">
-                <Icon className="w-4 h-4 text-[#76b900]" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76b900]" />{" "}
                 {s.label}
               </li>
             );
