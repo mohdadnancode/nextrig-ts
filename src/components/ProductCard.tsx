@@ -3,13 +3,7 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import { useCartControls } from "../context/useCartControls";
-import {
-  Heart,
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
-} from "lucide-react";
+import { Heart, ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Product } from "../types/product";
 import type { MouseEvent } from "react";
@@ -54,9 +48,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     addToCart(product);
   };
 
-  const handleWishlistToggle = (
-    e: MouseEvent<HTMLButtonElement>
-  ): void => {
+  const handleWishlistToggle = (e: MouseEvent<HTMLButtonElement>): void => {
     e.stopPropagation();
     if (!user) {
       toast.error("Please login to manage your wishlist");
@@ -147,17 +139,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </button>
 
             {/* Quantity */}
-            <span className="text-white font-semibold text-sm">
-              {quantity}
-            </span>
+            <span className="text-white font-semibold text-sm">{quantity}</span>
 
             {/* Plus */}
             <button
               onClick={increase}
               disabled={controlLoading}
-              className={`${
-                !canIncrease ? "text-gray-500" : "text-[#76b900]"
-              }`}
+              className={`${!canIncrease ? "text-gray-500" : "text-[#76b900]"}`}
             >
               <Plus size={20} />
             </button>
