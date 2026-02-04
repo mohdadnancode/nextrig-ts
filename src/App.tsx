@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./auth/ProtectedRoute";
-// import AdminRoutes from "./admin/routes/AdminRoutes";
+import AdminRoutes from "./admin/routes/AdminRoutes";
 
 /* -------- Public -------- */
 const Home = lazy(() => import("./pages/public/Home"));
@@ -85,7 +85,7 @@ const App: React.FC = () => {
         </Route>
 
         {/* Admin */}
-        {/* <Route path="/admin/*" element={<AdminRoutes />} /> */}
+        <Route path="/admin/*" element={<AdminRoutes />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
