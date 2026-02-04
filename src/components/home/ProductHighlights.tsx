@@ -99,25 +99,28 @@ const ProductHighlights = () => {
 
         {/* Carousel */}
         <div className="relative">
-          {/* Left */}
+          {/* Navigation buttons */}
           <button
             onClick={scrollLeft}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll left"
           >
-            ‹
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
 
-          {/* Right */}
           <button
             onClick={scrollRight}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll right"
           >
-            ›
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
 
-          {/* Products */}
+          {/* Product row */}
           <div
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto scroll-smooth pb-3 scrollbar-hide snap-x snap-mandatory"
@@ -126,15 +129,16 @@ const ProductHighlights = () => {
             {featuredProducts.map((product) => (
               <div
                 key={product.id}
-                className="shrink-0 w-56 sm:w-64 snap-start bg-white/5 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden hover:scale-105 transition-all duration-300"
+                className="shrink-0 w-56 sm:w-64 snap-start bg-white/5 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden hover:shadow-[0_0_15px_#76b90055] hover:scale-105 transition-all duration-300 group"
               >
                 {/* Image */}
                 <div className="relative bg-gray-900/50 aspect-4/3 flex items-center justify-center overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="object-contain w-full h-full transition-transform duration-300 hover:scale-110"
+                    className="object-contain w-full h-full transition-transform duration-300 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="absolute top-2 left-2 bg-[#76b900]/20 border border-[#76b900]/30 text-[#76b900] text-[10px] font-semibold px-2 py-0.5 rounded">
                     {product.category}
                   </span>
@@ -142,7 +146,7 @@ const ProductHighlights = () => {
 
                 {/* Info */}
                 <div className="p-3 flex flex-col justify-between h-30">
-                  <h3 className="text-white font-medium text-sm line-clamp-2">
+                  <h3 className="text-white font-medium text-sm line-clamp-2 group-hover:text-[#76b900] transition-colors">
                     {product.name}
                   </h3>
 
@@ -152,7 +156,7 @@ const ProductHighlights = () => {
                     </span>
                     <Link
                       to={`/products/${product.id}`}
-                      className="px-3 py-1.5 text-xs font-semibold text-black bg-[#76b900] rounded-md"
+                      className="px-3 py-1.5 text-xs font-semibold text-black bg-[#76b900] hover:bg-[#68a500] rounded-md transition-all duration-300 hover:shadow-[0_0_10px_rgba(118,185,0,0.4)]"
                     >
                       View
                     </Link>
@@ -163,16 +167,25 @@ const ProductHighlights = () => {
           </div>
         </div>
 
-        {/* View all */}
+        {/* View All Button */}
         <div className="text-center mt-8">
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#76b900] text-[#76b900] hover:bg-[#76b900] hover:text-black text-sm font-semibold rounded-lg"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#76b900] text-[#76b900] hover:bg-[#76b900] hover:text-black text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_15px_rgba(118,185,0,0.3)]"
           >
-            View All Products →
+            <span>View All Products</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </Link>
         </div>
       </div>
+
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 };

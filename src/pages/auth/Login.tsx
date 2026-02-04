@@ -87,10 +87,11 @@ const Login = () => {
               id="email"
               name="email"
               type="email"
+              placeholder="you@example.com"
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.email && formik.errors.email && (
               <p className="text-red-400 text-sm mt-1">{formik.errors.email}</p>
@@ -109,10 +110,11 @@ const Login = () => {
               id="password"
               name="password"
               type="password"
+              placeholder="Your password"
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-400 text-sm mt-1">
@@ -124,9 +126,11 @@ const Login = () => {
           <button
             type="submit"
             disabled={formik.isSubmitting || authLoading}
-            className="w-full bg-[#76b900] text-white font-semibold py-3 rounded-lg disabled:opacity-50"
+            className="before:ease relative w-full overflow-hidden border border-[#76b900] bg-[#76b900] hover:bg-[#68a500] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed animate-[glow_2s_ease-in-out_infinite] before:absolute before:right-0 before:top-0 before:h-full before:w-6 before:translate-x-12 before:rotate-6 before:bg-white before:opacity-10 before:duration-700 hover:shadow-[0_0_10px_#76b900] hover:before:-translate-x-40"
           >
-            {authLoading ? "Signing in..." : "Sign in"}
+            <span className="relative z-10">
+              {authLoading ? "Signing in..." : "Sign in"}
+            </span>
           </button>
         </form>
 

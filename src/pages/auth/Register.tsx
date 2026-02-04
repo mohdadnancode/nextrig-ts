@@ -104,10 +104,11 @@ const Register = () => {
               id="username"
               name="username"
               type="text"
+              placeholder="NeoBuilder"
               value={formik.values.username}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.username && formik.errors.username && (
               <p className="text-red-400 text-sm mt-1">
@@ -125,10 +126,11 @@ const Register = () => {
               id="email"
               name="email"
               type="email"
+              placeholder="you@example.com"
               value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.email && formik.errors.email && (
               <p className="text-red-400 text-sm mt-1">{formik.errors.email}</p>
@@ -147,10 +149,11 @@ const Register = () => {
               id="password"
               name="password"
               type="password"
+              placeholder="At least 6 characters"
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.password && formik.errors.password && (
               <p className="text-red-400 text-sm mt-1">
@@ -171,10 +174,11 @@ const Register = () => {
               id="confirmPassword"
               name="confirmPassword"
               type="password"
+              placeholder="Re-enter password"
               value={formik.values.confirmPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5"
+              className="w-full rounded-lg bg-white/5 border border-white/10 text-white px-4 py-2.5 focus:outline-none focus:border-[#76b900] focus:ring-2 focus:ring-[#76b900]/40 transition"
             />
             {formik.touched.confirmPassword &&
               formik.errors.confirmPassword && (
@@ -184,12 +188,15 @@ const Register = () => {
               )}
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={formik.isSubmitting || authLoading}
-            className="w-full bg-[#76b900] text-white font-semibold py-3 rounded-lg disabled:opacity-50"
+            className="before:ease relative w-full overflow-hidden border border-[#76b900] bg-[#76b900] hover:bg-[#68a500] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed animate-[glow_2s_ease-in-out_infinite] before:absolute before:right-0 before:top-0 before:h-full before:w-6 before:translate-x-12 before:rotate-6 before:bg-white before:opacity-10 before:duration-700 hover:shadow-[0_0_10px_#76b900] hover:before:-translate-x-40"
           >
-            {authLoading ? "Creating Account..." : "Create Account"}
+            <span className="relative z-10">
+              {authLoading ? "Creating Account..." : "Create Account"}
+            </span>
           </button>
         </form>
 
@@ -197,7 +204,7 @@ const Register = () => {
           Already have an account?{" "}
           <button
             type="button"
-            className="text-[#76b900] hover:underline"
+            className="text-[#76b900] hover:underline transition-colors"
             onClick={() => navigate("/login")}
           >
             Sign in

@@ -11,7 +11,7 @@ const HeroSection = () => {
         bg-[#0d0d0d]
         text-white
         pt-20
-        overflow-hidden
+        overflow-hiddena
       "
     >
       <div className="absolute inset-0 bg-linear-to-br from-black via-[#0d0d0d] to-black" />

@@ -1,0 +1,1057 @@
+{
+  "users": [
+    {
+      "id": "whpj",
+      "username": "admin",
+      "email": "admin@gmail.com",
+      "password": "admin123",
+      "role": "admin",
+      "profileImage": "",
+      "address": {
+        "fullName": "Afdmin",
+        "address": "Udyawar Manjeshwar",
+        "city": "Kasaragod",
+        "pincode": "671323",
+        "mobileNumber": "9074774402"
+      },
+      "cart": [],
+      "orders": [
+        {
+          "id": "ORD-1770201927673",
+          "date": "2026-02-04T10:45:27.673Z",
+          "items": [
+            {
+              "id": "36",
+              "name": "Corsair RM850x 850W 80+ Gold",
+              "price": 10999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/71dj+5GQwEL._SX679_.jpg",
+              "category": "Power Supply"
+            }
+          ],
+          "totalAmount": 11014,
+          "status": "pending",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Afdmin",
+            "address": "Udyawar Manjeshwar",
+            "city": "Kasaragod",
+            "pincode": "671323",
+            "mobileNumber": "9074774402"
+          }
+        }
+      ],
+      "wishlist": [],
+      "createdAt": "2025-12-18T09:56:57.826Z",
+      "updatedAt": "2026-02-04T10:45:27.682Z",
+      "isBlocked": false
+    },
+    {
+      "id": "a3ed",
+      "username": "Adnan",
+      "email": "adnan@gmail.com",
+      "password": "123456",
+      "role": "user",
+      "profileImage": "",
+      "address": {
+        "fullName": "Mohammed Adnan",
+        "address": "Udyawar Manjeshwar",
+        "city": "Kasaragod",
+        "pincode": "671323",
+        "mobileNumber": "9074774402"
+      },
+      "cart": [],
+      "orders": [
+        {
+          "id": "ORD-1766050301204",
+          "date": "2025-12-18T09:31:41.204Z",
+          "items": [
+            {
+              "id": "26",
+              "name": "Sony PlayStation 5",
+              "price": 55999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/51ljnEaW0pL._SX679_.jpg",
+              "category": "Gaming Console"
+            }
+          ],
+          "totalAmount": 56014,
+          "status": "delivered",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Mohammed Adnan",
+            "address": "Udyawar Manjeshwar",
+            "city": "Kasaragod",
+            "pincode": "671323",
+            "mobileNumber": "9074774402"
+          }
+        },
+        {
+          "id": "ORD-1766115088042",
+          "date": "2025-12-19T03:31:28.042Z",
+          "items": [
+            {
+              "id": "26",
+              "name": "Sony PlayStation 5",
+              "price": 55999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/51ljnEaW0pL._SX679_.jpg",
+              "category": "Gaming Console"
+            }
+          ],
+          "totalAmount": 55999,
+          "status": "shipped",
+          "paymentMethod": "UPI",
+          "paymentDetails": {
+            "transactionId": "qwertyuiopqwertyuiopqwertyuiopqwert"
+          },
+          "shippingAddress": {
+            "fullName": "Mohammed Adnan",
+            "address": "Udyawar Manjeshwar",
+            "city": "Kasaragod",
+            "pincode": "671323",
+            "mobileNumber": "9074774402"
+          }
+        },
+        {
+          "id": "ORD-1766115110521",
+          "date": "2025-12-19T03:31:50.521Z",
+          "items": [
+            {
+              "id": "48",
+              "name": "Samsung Odyssey G5 32” Curved",
+              "price": 32999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/81QaQzokQtL._SX679_.jpg",
+              "category": "Monitor"
+            }
+          ],
+          "totalAmount": 33014,
+          "status": "cancelled",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Mohammed Adnan",
+            "address": "Udyawar Manjeshwar",
+            "city": "Kasaragod",
+            "pincode": "671323",
+            "mobileNumber": "9074774402"
+          },
+          "cancelledBy": "user",
+          "cancelledAt": "2025-12-19T04:29:19.084Z"
+        }
+      ],
+      "wishlist": [],
+      "createdAt": "2025-11-27T04:32:46.576Z",
+      "updatedAt": "2026-02-04T10:34:52.107Z",
+      "isBlocked": false
+    },
+    {
+      "id": "pg3j",
+      "username": "GamerX",
+      "email": "gamerx@gmail.com",
+      "password": "123456",
+      "role": "user",
+      "profileImage": "",
+      "address": {
+        "fullName": "Mr. GamerX",
+        "address": "Somewhere inside a Open World",
+        "city": "City",
+        "pincode": "123456",
+        "mobileNumber": "1234567890"
+      },
+      "cart": [],
+      "orders": [
+        {
+          "id": "ORD-1766116268457",
+          "date": "2025-12-19T03:51:08.457Z",
+          "items": [
+            {
+              "id": "4",
+              "name": "MSI RTX 4070 Ventus 3X 12G OC",
+              "price": 74999,
+              "quantity": 1,
+              "image": "https://asset.msi.com/resize/image/global/product/product_168129026654856ce716146a2ed75e27534eed8b42.png62405b38c58fe0f07fcef2367d8a9ba1/600.png",
+              "category": "GPU"
+            },
+            {
+              "id": "20",
+              "name": "Kingston KC3000 2TB NVMe SSD",
+              "price": 15999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/61b1pY91OlL._SX522_.jpg",
+              "category": "Storage"
+            },
+            {
+              "id": "7",
+              "name": "AMD Ryzen 9 7950X",
+              "price": 55999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/5116zdA9uyL._SX522_.jpg",
+              "category": "CPU"
+            },
+            {
+              "id": "31",
+              "name": "Corsair iCUE H150i Elite Capellix XT",
+              "price": 16999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/7107JaxG7XL._SX679_.jpg",
+              "category": "Cooling System"
+            },
+            {
+              "id": "23",
+              "name": "Gigabyte X670 AORUS Elite AX ATX",
+              "price": 26999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/71ubTinPcOL._SX679_.jpg",
+              "category": "Motherboard"
+            }
+          ],
+          "totalAmount": 191010,
+          "status": "pending",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Mr. GamerX",
+            "address": "Somewhere inside a Open World",
+            "city": "City",
+            "pincode": "123456",
+            "mobileNumber": "1234567890"
+          }
+        },
+        {
+          "id": "ORD-1766116356826",
+          "date": "2025-12-19T03:52:36.826Z",
+          "items": [
+            {
+              "id": "60",
+              "name": "HP Omen 16 (RTX 4060)",
+              "price": 139999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/51ul010CLsL.jpg",
+              "category": "Laptop"
+            }
+          ],
+          "totalAmount": 139999,
+          "status": "cancelled",
+          "paymentMethod": "card",
+          "paymentDetails": {
+            "cardNumber": "XXXX-XXXX-XXXX-3456",
+            "cardName": "GamerX"
+          },
+          "shippingAddress": {
+            "fullName": "Mr. GamerX",
+            "address": "Somewhere inside a Open World",
+            "city": "City",
+            "pincode": "123456",
+            "mobileNumber": "1234567890"
+          },
+          "cancelledBy": "admin",
+          "cancelledAt": "2025-12-19T09:50:03.470Z"
+        }
+      ],
+      "wishlist": [],
+      "createdAt": "2025-12-01T08:45:07.862Z",
+      "updatedAt": "2025-12-19T03:52:36.835Z",
+      "isBlocked": false
+    },
+    {
+      "id": "3ths",
+      "username": "test123",
+      "email": "test@gmail.com",
+      "password": "test123",
+      "role": "user",
+      "profileImage": "",
+      "address": [],
+      "cart": [],
+      "orders": [],
+      "wishlist": [],
+      "createdAt": "2025-12-18T09:33:10.634Z",
+      "updatedAt": "2025-12-18T09:33:10.634Z",
+      "isBlocked": true
+    },
+    {
+      "id": "n0ah",
+      "username": "test",
+      "email": "testing@gmail.com",
+      "password": "123456",
+      "role": "user",
+      "profileImage": "",
+      "address": {
+        "fullName": "Hehe he",
+        "address": "heheheheheh",
+        "city": "heheh",
+        "pincode": "123456",
+        "mobileNumber": "1234567890"
+      },
+      "cart": [],
+      "orders": [
+        {
+          "id": "ORD-1766138359904",
+          "date": "2025-12-19T09:59:19.904Z",
+          "items": [
+            {
+              "id": "45",
+              "name": "Ant Esports ICE-511MT",
+              "price": 4499,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/61Is9PG4ChL._SX679_.jpg",
+              "category": "PC Case"
+            },
+            {
+              "id": "1",
+              "name": "NVIDIA GeForce RTX 4070 Ti Super",
+              "price": 89999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/81usCHFOWVL._SX679_.jpg",
+              "category": "GPU"
+            },
+            {
+              "id": "34",
+              "name": "Cooler Master Hyper 212 Black Edition",
+              "price": 4299,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/81FBKqaJWzL._SX679_.jpg",
+              "category": "Cooling System"
+            },
+            {
+              "id": "8",
+              "name": "Intel Core i7-13700F",
+              "price": 39999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/61h4d1FjCWL._SX679_.jpg",
+              "category": "CPU"
+            }
+          ],
+          "totalAmount": 138811,
+          "status": "cancelled",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Mohammed Adnan",
+            "address": "Udyawar Manjeshwar",
+            "city": "Kasaragod",
+            "pincode": "671323",
+            "mobileNumber": "9074774402"
+          },
+          "cancelledBy": "admin",
+          "cancelledAt": "2025-12-19T10:00:16.720Z"
+        },
+        {
+          "id": "ORD-1766217967591",
+          "date": "2025-12-20T08:06:07.591Z",
+          "items": [
+            {
+              "id": "13",
+              "name": "Kingston Fury Beast 16GB DDR4 3600MHz",
+              "price": 7499,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/71nQp70NhYL._SX522_.jpg",
+              "category": "RAM"
+            },
+            {
+              "id": "17",
+              "name": "Western Digital SN850X 2TB NVMe SSD",
+              "price": 16999,
+              "quantity": 1,
+              "image": "https://m.media-amazon.com/images/I/61jQCrK6mFL._SX679_.jpg",
+              "category": "Storage"
+            }
+          ],
+          "totalAmount": 24513,
+          "status": "pending",
+          "paymentMethod": "cod",
+          "paymentDetails": {
+            "convenienceFee": 15
+          },
+          "shippingAddress": {
+            "fullName": "Hehe he",
+            "address": "heheheheheh",
+            "city": "heheh",
+            "pincode": "123456",
+            "mobileNumber": "1234567890"
+          }
+        }
+      ],
+      "wishlist": [],
+      "createdAt": "2025-12-19T09:55:51.897Z",
+      "updatedAt": "2025-12-20T08:06:07.599Z",
+      "isBlocked": false
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "NVIDIA GeForce RTX 4070 Ti Super",
+      "brand": "NVIDIA",
+      "category": "GPU",
+      "price": 89999,
+      "description": "Powerful gaming GPU with 12GB GDDR6X VRAM, DLSS 3, and ray tracing support.",
+      "image": "https://m.media-amazon.com/images/I/81usCHFOWVL._SX679_.jpg",
+      "featured": true,
+      "updatedAt": "2025-12-19T09:48:20.433Z"
+    },
+    {
+      "id": "2",
+      "name": "AMD Radeon RX 7900 XT",
+      "brand": "AMD",
+      "category": "GPU",
+      "price": 79999,
+      "description": "High-end gaming GPU with 20GB GDDR6 VRAM and RDNA 3 architecture.",
+      "image": "https://gamexcomputers.com/wp-content/uploads/2024/12/gv-r79xtgaming-oc-20gd-image-main-600x600-1.webp",
+      "featured": true
+    },
+    {
+      "id": "3",
+      "name": "ASUS TUF RTX 3060 OC",
+      "brand": "ASUS",
+      "category": "GPU",
+      "price": 35999,
+      "description": "Reliable mid-tier GPU with 12GB GDDR6 VRAM and dual-fan cooling.",
+      "image": "https://dlcdnwebimgs.asus.com/gain/233558c6-999a-4458-98d8-34eac09cb836/w800/fwebp",
+      "featured": false
+    },
+    {
+      "id": "4",
+      "name": "MSI RTX 4070 Ventus 3X 12G OC",
+      "brand": "MSI",
+      "category": "GPU",
+      "price": 74999,
+      "description": "Triple-fan cooling system for efficient performance in long gaming sessions.",
+      "image": "https://asset.msi.com/resize/image/global/product/product_168129026654856ce716146a2ed75e27534eed8b42.png62405b38c58fe0f07fcef2367d8a9ba1/600.png",
+      "featured": false
+    },
+    {
+      "id": "5",
+      "name": "Gigabyte RTX 4060 Eagle OC",
+      "brand": "Gigabyte",
+      "category": "GPU",
+      "price": 52999,
+      "description": "Affordable RTX card with ray tracing and AI-powered performance boost.",
+      "image": "https://m.media-amazon.com/images/I/71g2Lc8urJL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "6",
+      "name": "Intel Core i9-13900K",
+      "brand": "Intel",
+      "category": "CPU",
+      "price": 58999,
+      "description": "24-core processor with 32 threads, ideal for gaming and streaming.",
+      "image": "https://m.media-amazon.com/images/I/61My4F2-XUL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "7",
+      "name": "AMD Ryzen 9 7950X",
+      "brand": "AMD",
+      "category": "CPU",
+      "price": 55999,
+      "description": "16-core, 32-thread CPU built on Zen 4 architecture for ultimate performance.",
+      "image": "https://m.media-amazon.com/images/I/5116zdA9uyL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "8",
+      "name": "Intel Core i7-13700F",
+      "brand": "Intel",
+      "category": "CPU",
+      "price": 39999,
+      "description": "High-performance CPU with 16 cores and 24 threads for powerful multitasking.",
+      "image": "https://m.media-amazon.com/images/I/61h4d1FjCWL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "9",
+      "name": "AMD Ryzen 7 7800X3D",
+      "brand": "AMD",
+      "category": "CPU",
+      "price": 44999,
+      "description": "8-core gaming CPU with 3D V-Cache for boosted frame rates.",
+      "image": "https://www.amd.com/content/dam/amd/en/images/products/processors/ryzen/2505503-ryzen-7-7800x3d.jpg",
+      "featured": true
+    },
+    {
+      "id": "10",
+      "name": "Intel Core i5-13600KF",
+      "brand": "Intel",
+      "category": "CPU",
+      "price": 28999,
+      "description": "Best midrange CPU for gaming and productivity with 14 cores.",
+      "image": "https://m.media-amazon.com/images/I/61LzzuUNhKL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "11",
+      "name": "Corsair Vengeance RGB 32GB (2x16GB) DDR5 6000MHz",
+      "brand": "Corsair",
+      "category": "RAM",
+      "price": 17999,
+      "description": "High-speed DDR5 RAM with RGB lighting for enthusiasts.",
+      "image": "https://m.media-amazon.com/images/I/61EVf-QxpvL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "12",
+      "name": "G.Skill Trident Z5 RGB 32GB DDR5 6400MHz",
+      "brand": "G.Skill",
+      "category": "RAM",
+      "price": 19999,
+      "description": "Ultra-fast DDR5 kit built for overclocking and modern CPUs.",
+      "image": "https://m.media-amazon.com/images/I/61bc6zvEIIL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "13",
+      "name": "Kingston Fury Beast 16GB DDR4 3600MHz",
+      "brand": "Kingston",
+      "category": "RAM",
+      "price": 7499,
+      "description": "Affordable DDR4 memory with great reliability for gaming rigs.",
+      "image": "https://m.media-amazon.com/images/I/71nQp70NhYL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "14",
+      "name": "TEAMGROUP T-Force Delta RGB 32GB DDR5 6000MHz",
+      "brand": "TEAMGROUP",
+      "category": "RAM",
+      "price": 18999,
+      "description": "Stylish RGB DDR5 RAM with blazing-fast performance.",
+      "image": "https://m.media-amazon.com/images/I/71qmjFLuFWL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "15",
+      "name": "Crucial 16GB DDR4 3200MHz",
+      "brand": "Crucial",
+      "category": "RAM",
+      "price": 4999,
+      "description": "Reliable and budget-friendly memory for everyday use.",
+      "image": "https://m.media-amazon.com/images/I/51VO7toQIyL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "16",
+      "name": "Samsung 980 PRO 1TB NVMe SSD",
+      "brand": "Samsung",
+      "category": "Storage",
+      "price": 8999,
+      "description": "Ultra-fast PCIe 4.0 SSD with read speeds up to 7000MB/s.",
+      "image": "https://m.media-amazon.com/images/I/71qA45tWZ5L._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "17",
+      "name": "Western Digital SN850X 2TB NVMe SSD",
+      "brand": "WD",
+      "category": "Storage",
+      "price": 16999,
+      "description": "High-performance gaming SSD with thermal control and endurance.",
+      "image": "https://m.media-amazon.com/images/I/61jQCrK6mFL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "18",
+      "name": "Crucial MX500 1TB SATA SSD",
+      "brand": "Crucial",
+      "category": "Storage",
+      "price": 5999,
+      "description": "Reliable SATA SSD for smooth everyday and gaming performance.",
+      "image": "https://m.media-amazon.com/images/I/51BZEAbbFDL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "19",
+      "name": "Seagate Barracuda 2TB HDD",
+      "brand": "Seagate",
+      "category": "Storage",
+      "price": 4999,
+      "description": "Traditional HDD for backup and storage expansion.",
+      "image": "https://m.media-amazon.com/images/I/71NyznvXLOL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "20",
+      "name": "Kingston KC3000 2TB NVMe SSD",
+      "brand": "Kingston",
+      "category": "Storage",
+      "price": 15999,
+      "description": "PCIe 4.0 NVMe SSD ideal for high-end gaming builds.",
+      "image": "https://m.media-amazon.com/images/I/61b1pY91OlL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "21",
+      "name": "ASUS ROG Strix Z790-E Gaming WiFi",
+      "brand": "ASUS",
+      "category": "Motherboard",
+      "price": 37999,
+      "description": "Premium Intel motherboard with DDR5 support, PCIe 5.0, and WiFi 6E.",
+      "image": "https://m.media-amazon.com/images/I/81rmOwyu6fL._SX679_.jpg",
+      "featured": true
+    },
+    {
+      "id": "22",
+      "name": "MSI B650 Tomahawk WiFi",
+      "brand": "MSI",
+      "category": "Motherboard",
+      "price": 22999,
+      "description": "AM5 motherboard with PCIe 5.0 support and excellent VRMs.",
+      "image": "https://m.media-amazon.com/images/I/81ymStt-9cL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "23",
+      "name": "Gigabyte X670 AORUS Elite AX ATX",
+      "brand": "Gigabyte",
+      "category": "Motherboard",
+      "price": 26999,
+      "description": "High-performance AMD board built for Ryzen 7000 series CPUs.",
+      "image": "https://m.media-amazon.com/images/I/71ubTinPcOL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "24",
+      "name": "ASRock B550M Steel Legend",
+      "brand": "ASRock",
+      "category": "Motherboard",
+      "price": 14999,
+      "description": "Solid AM4 motherboard with excellent build quality and features.",
+      "image": "https://m.media-amazon.com/images/I/71O3pdmuUoL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "25",
+      "name": "ASUS Prime H610M-E D4",
+      "brand": "ASUS",
+      "category": "Motherboard",
+      "price": 8999,
+      "description": "Budget Intel motherboard supporting 12th/13th Gen CPUs.",
+      "image": "https://m.media-amazon.com/images/I/71ADaydrBFL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "26",
+      "name": "Sony PlayStation 5",
+      "brand": "Sony",
+      "category": "Gaming Console",
+      "price": 55999,
+      "description": "Next-gen gaming console with ultra-fast SSD and ray tracing support.",
+      "image": "https://m.media-amazon.com/images/I/51ljnEaW0pL._SX679_.jpg",
+      "featured": true
+    },
+    {
+      "id": "27",
+      "name": "Microsoft Xbox Series X",
+      "brand": "Microsoft",
+      "category": "Gaming Console",
+      "price": 52999,
+      "description": "Powerful console with 12 teraflops GPU and Game Pass support.",
+      "image": "https://m.media-amazon.com/images/I/61-jjE67uqL._SX679_.jpg",
+      "featured": true
+    },
+    {
+      "id": "28",
+      "name": "Valve Steam Deck 512GB",
+      "brand": "Valve",
+      "category": "Handheld",
+      "price": 49999,
+      "description": "Portable gaming PC with a 7-inch display and AMD APU.",
+      "image": "https://m.media-amazon.com/images/I/51Nw-kEg9zL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "29",
+      "name": "ASUS ROG Ally Z1 Extreme",
+      "brand": "ASUS",
+      "category": "Handheld",
+      "price": 62999,
+      "description": "Windows handheld gaming device with 120Hz display and AMD Z1 chip.",
+      "image": "https://m.media-amazon.com/images/I/71MUfCIyAWL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "30",
+      "name": "Nintendo Switch OLED",
+      "brand": "Nintendo",
+      "category": "Handheld",
+      "price": 34999,
+      "description": "Hybrid console with vibrant OLED display and exclusive Nintendo titles.",
+      "image": "https://m.media-amazon.com/images/I/71Q54HnKxwS._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "31",
+      "name": "Corsair iCUE H150i Elite Capellix XT",
+      "brand": "Corsair",
+      "category": "Cooling System",
+      "price": 16999,
+      "description": "360mm AIO liquid cooler with RGB fans and zero RPM mode for silent operation.",
+      "image": "https://m.media-amazon.com/images/I/7107JaxG7XL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "32",
+      "name": "NZXT Kraken Elite 240 RGB",
+      "brand": "NZXT",
+      "category": "Cooling System",
+      "price": 13999,
+      "description": "Efficient liquid cooler with customizable LCD screen and RGB fans.",
+      "image": "https://m.media-amazon.com/images/I/51N3O--IiUL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "33",
+      "name": "DeepCool AK620 Air Cooler",
+      "brand": "DeepCool",
+      "category": "Cooling System",
+      "price": 7499,
+      "description": "High-performance dual-tower air cooler with silent fans and excellent thermals.",
+      "image": "https://m.media-amazon.com/images/I/71Asn5eTwKL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "34",
+      "name": "Cooler Master Hyper 212 Black Edition",
+      "brand": "Cooler Master",
+      "category": "Cooling System",
+      "price": 4299,
+      "description": "Iconic air cooler offering reliable cooling and sleek all-black design.",
+      "image": "https://m.media-amazon.com/images/I/81FBKqaJWzL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "35",
+      "name": "Lian Li Galahad 360 AIO RGB",
+      "brand": "Lian Li",
+      "category": "Cooling System",
+      "price": 15999,
+      "description": "Premium liquid cooling solution with aluminum pump housing and RGB lighting.",
+      "image": "https://m.media-amazon.com/images/I/61N5ODImusL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "36",
+      "name": "Corsair RM850x 850W 80+ Gold",
+      "brand": "Corsair",
+      "category": "Power Supply",
+      "price": 10999,
+      "description": "Fully modular PSU with silent fan mode and premium Japanese capacitors.",
+      "image": "https://m.media-amazon.com/images/I/71dj+5GQwEL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "37",
+      "name": "Cooler Master MWE 750W Bronze",
+      "brand": "Cooler Master",
+      "category": "Power Supply",
+      "price": 6499,
+      "description": "Reliable PSU with 80+ Bronze efficiency and DC-to-DC technology.",
+      "image": "https://m.media-amazon.com/images/I/819vv+RibNL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "38",
+      "name": "Seasonic Focus GX-750 80+ Gold",
+      "brand": "Seasonic",
+      "category": "Power Supply",
+      "price": 9999,
+      "description": "Fully modular design with premium build and quiet 120mm fan.",
+      "image": "https://m.media-amazon.com/images/I/71yaAdRzFCL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "39",
+      "name": "ASUS ROG Thor 1000W Platinum II",
+      "brand": "ASUS",
+      "category": "Power Supply",
+      "price": 23999,
+      "description": "Flagship PSU with OLED power display and Aura Sync RGB.",
+      "image": "https://m.media-amazon.com/images/I/81g2lMkfDnL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "40",
+      "name": "Ant Esports VS500L 500W",
+      "brand": "Ant Esports",
+      "category": "Power Supply",
+      "price": 2499,
+      "description": "Budget-friendly non-modular PSU for entry-level gaming rigs.",
+      "image": "https://antesports.com/wp-content/uploads/2023/04/VS500L-1-150x150.png?x56341",
+      "featured": false
+    },
+    {
+      "id": "41",
+      "name": "Lian Li O11 Dynamic EVO XL",
+      "brand": "Lian Li",
+      "category": "PC Case",
+      "price": 13999,
+      "description": "Premium dual-chamber case with tempered glass and versatile airflow.",
+      "image": "https://m.media-amazon.com/images/I/617EO7rVz9L._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "42",
+      "name": "NZXT H510 Flow",
+      "brand": "NZXT",
+      "category": "PC Case",
+      "price": 7999,
+      "description": "Minimalistic mid-tower with improved front airflow and cable management.",
+      "image": "https://m.media-amazon.com/images/I/71bS0KeA82L._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "43",
+      "name": "Cooler Master TD500 Mesh V2",
+      "brand": "Cooler Master",
+      "category": "PC Case",
+      "price": 8999,
+      "description": "Stylish airflow-focused mid-tower case with ARGB fans pre-installed.",
+      "image": "https://m.media-amazon.com/images/I/51DeHvWq0tL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "44",
+      "name": "Corsair 4000D Airflow",
+      "brand": "Corsair",
+      "category": "PC Case",
+      "price": 8599,
+      "description": "Top-rated mid-tower case with high airflow design and cable routing channels.",
+      "image": "https://m.media-amazon.com/images/I/71J4iohAlaL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "45",
+      "name": "Ant Esports ICE-511MT",
+      "brand": "Ant Esports",
+      "category": "PC Case",
+      "price": 4499,
+      "description": "Affordable gaming case with RGB fans and tempered glass panel.",
+      "image": "https://m.media-amazon.com/images/I/61Is9PG4ChL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "46",
+      "name": "LG Ultragear 27GL850 27” QHD 144Hz",
+      "brand": "LG",
+      "category": "Monitor",
+      "price": 29999,
+      "description": "QHD Nano IPS monitor with 1ms response and G-Sync support.",
+      "image": "https://media.us.lg.com/transform/ecomm-PDPGallery-1100x730/227b376e-c8b6-443d-b578-487704537f1d/md06064916-zoom-01-jpg?io=transform:fill,width:1536",
+      "featured": false
+    },
+    {
+      "id": "47",
+      "name": "ASUS TUF VG259QM 24.5” 280Hz",
+      "brand": "ASUS",
+      "category": "Monitor",
+      "price": 26999,
+      "description": "Ultra-fast gaming monitor with 280Hz refresh and ELMB Sync.",
+      "image": "https://m.media-amazon.com/images/I/71TQ7XFwArL._AC_SX466_.jpg",
+      "featured": false
+    },
+    {
+      "id": "48",
+      "name": "Samsung Odyssey G5 32” Curved",
+      "brand": "Samsung",
+      "category": "Monitor",
+      "price": 32999,
+      "description": "WQHD curved gaming display with 165Hz refresh rate and HDR10.",
+      "image": "https://m.media-amazon.com/images/I/81QaQzokQtL._SX679_.jpg",
+      "featured": true
+    },
+    {
+      "id": "49",
+      "name": "Acer Nitro VG270 M3 27” FHD 180Hz",
+      "brand": "Acer",
+      "category": "Monitor",
+      "price": 17999,
+      "description": "Budget-friendly IPS gaming monitor with FreeSync Premium.",
+      "image": "https://m.media-amazon.com/images/I/81rPL0BFDLL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "50",
+      "name": "Gigabyte M27Q 27” QHD 170Hz",
+      "brand": "Gigabyte",
+      "category": "Monitor",
+      "price": 24999,
+      "description": "QHD IPS panel with KVM feature and 0.5ms response time.",
+      "image": "https://m.media-amazon.com/images/I/61G3qKvF7lL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "51",
+      "name": "Logitech G Pro X Superlight",
+      "brand": "Logitech",
+      "category": "Mouse",
+      "price": 12999,
+      "description": "Lightweight wireless mouse with HERO 25K sensor and ultra-low latency.",
+      "image": "https://m.media-amazon.com/images/I/41hZLkQFiiL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "52",
+      "name": "Razer Viper V2 Pro",
+      "brand": "Razer",
+      "category": "Mouse",
+      "price": 13999,
+      "description": "Ultralight gaming mouse with Focus Pro 30K sensor and 70-hour battery life.",
+      "image": "https://m.media-amazon.com/images/I/51eDg1T+iML._SY879_.jpg",
+      "featured": false
+    },
+    {
+      "id": "53",
+      "name": "SteelSeries Apex Pro TKL",
+      "brand": "SteelSeries",
+      "category": "Keyboard",
+      "price": 18999,
+      "description": "Adjustable OmniPoint switches and aluminum build for top-tier performance.",
+      "image": "https://m.media-amazon.com/images/I/71aDZGDOwlL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "54",
+      "name": "Corsair K70 CORE TKL RGB",
+      "brand": "Corsair",
+      "category": "Keyboard",
+      "price": 11999,
+      "description": "Compact mechanical keyboard with PBT keycaps and per-key RGB.",
+      "image": "https://m.media-amazon.com/images/I/71WNjISlrJL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "55",
+      "name": "HyperX Cloud Alpha Wireless",
+      "brand": "HyperX",
+      "category": "Headset",
+      "price": 12999,
+      "description": "Dual chamber driver headset with 300-hour battery life and amazing comfort.",
+      "image": "https://m.media-amazon.com/images/I/71pFeJFdJQL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "56",
+      "name": "Blue Yeti X Microphone",
+      "brand": "Blue",
+      "category": "Microphone",
+      "price": 13999,
+      "description": "Professional USB condenser mic with customizable LED metering.",
+      "image": "https://m.media-amazon.com/images/I/61egnO8q6ZL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "57",
+      "name": "ASUS ROG Strix G16 (RTX 4070)",
+      "brand": "ASUS",
+      "category": "Laptop",
+      "price": 169999,
+      "description": "16-inch gaming laptop with Intel i9, RTX 4070, and QHD 240Hz display.",
+      "image": "https://m.media-amazon.com/images/I/71xhw+ElylL._SX679_.jpg",
+      "featured": true
+    },
+    {
+      "id": "58",
+      "name": "MSI Katana 15 (RTX 4050)",
+      "brand": "MSI",
+      "category": "Laptop",
+      "price": 124999,
+      "description": "Gaming laptop with Intel i7 13th Gen and RTX 4050 GPU.",
+      "image": "https://m.media-amazon.com/images/I/51dRGelADgL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "59",
+      "name": "Lenovo Legion 5 Pro (RTX 3070)",
+      "brand": "Lenovo",
+      "category": "Laptop",
+      "price": 149999,
+      "description": "16-inch gaming laptop with AMD Ryzen 7 and WQXGA 165Hz display.",
+      "image": "https://m.media-amazon.com/images/I/71UQsd1U59L._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "60",
+      "name": "HP Omen 16 (RTX 4060)",
+      "brand": "HP",
+      "category": "Laptop",
+      "price": 139999,
+      "description": "Gaming powerhouse with Intel i7, RTX 4060, and 165Hz IPS screen.",
+      "image": "https://m.media-amazon.com/images/I/51ul010CLsL.jpg",
+      "featured": false
+    },
+    {
+      "id": "61",
+      "name": "Acer Predator Helios 300",
+      "brand": "Acer",
+      "category": "Laptop",
+      "price": 134999,
+      "description": "Popular gaming laptop with RTX 3070 and RGB keyboard.",
+      "image": "https://m.media-amazon.com/images/I/61oxBxvzkTL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "62",
+      "name": "Razer Mouse Bungee V3",
+      "brand": "Razer",
+      "category": "Accessory",
+      "price": 2499,
+      "description": "Weighted mouse bungee for smooth, drag-free mouse movement.",
+      "image": "https://m.media-amazon.com/images/I/51OmfBRvD9L._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "63",
+      "name": "Elgato Stream Deck Mini",
+      "brand": "Elgato",
+      "category": "Accessory",
+      "price": 8999,
+      "description": "Compact 6-button controller for streamers to trigger custom actions.",
+      "image": "https://m.media-amazon.com/images/I/61w+a4IDpsL._SX522_.jpg",
+      "featured": false
+    },
+    {
+      "id": "64",
+      "name": "Logitech C920 HD Pro Webcam",
+      "brand": "Logitech",
+      "category": "Accessory",
+      "price": 7499,
+      "description": "1080p webcam ideal for streaming, video calls, and content creation.",
+      "image": "https://m.media-amazon.com/images/I/71eGb1FcyiL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "65",
+      "name": "NZXT RGB Cable Comb Kit",
+      "brand": "NZXT",
+      "category": "Accessory",
+      "price": 1999,
+      "description": "Cable management kit with vibrant addressable RGB lighting.",
+      "image": "https://m.media-amazon.com/images/I/61oPn3xPTGL._SX679_.jpg",
+      "featured": false
+    },
+    {
+      "id": "66",
+      "name": "MSI Geforce RTX 5090",
+      "brand": "MSI",
+      "category": "GPU",
+      "price": 451799,
+      "description": "MSI Geforce RTX 5090 32G SUPRIM Liquid SOC Graphic Card - NVIDIA Geforce RTX 5090 GPU, 32GB GDDR7 512-Bit Memory, 28 Gbps, PCI_e Gen 5 X 16 Interface, Upto 2565 Mhz, STORMFORCE Fan",
+      "image": "https://m.media-amazon.com/images/I/61W07KSaKYL._SX450_.jpg",
+      "featured": true
+    }
+  ]
+}

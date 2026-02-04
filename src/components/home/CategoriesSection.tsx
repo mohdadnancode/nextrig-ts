@@ -128,8 +128,7 @@ const CategoriesSection = () => {
         {/* Category Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
           {categories.map((category, index) => {
-            const image = categoryImages[category] ?? gpu;
-
+            const image = categoryImages[category] || gpu; // fallback
             return (
               <div
                 key={category}
@@ -157,7 +156,7 @@ const CategoriesSection = () => {
           })}
         </div>
 
-        {/* View All */}
+        {/* View All Button */}
         <div className="text-center mt-10">
           <button
             onClick={() => navigate("/products")}
