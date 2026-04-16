@@ -98,7 +98,7 @@ const HeroSection = () => {
               </Link>
 
               <Link
-                to="/custom"
+                to="/contac"
                 className="px-7 py-3.5 rounded-xl border border-white/10 text-gray-300 transition-all duration-300 hover:text-white hover:border-primary/40 hover:bg-white/[0.03]"
               >
                 Custom Build
