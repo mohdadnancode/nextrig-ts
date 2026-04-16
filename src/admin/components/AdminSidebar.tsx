@@ -46,7 +46,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ open, setOpen }) => {
       >
         {/* Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-[#76b900]/20">
-          <span className="text-xl font-bold text-[#76b900]">
+          <span className="text-xl font-bold text-primary">
             NextRig Admin
           </span>
           <button onClick={() => setOpen(false)} className="lg:hidden">
@@ -65,7 +65,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ open, setOpen }) => {
                 `flex items-center gap-3 px-4 py-2 rounded-lg transition
                 ${
                   isActive
-                    ? "bg-[#76b900]/20 text-[#76b900]"
+                    ? "bg-[#76b900]/20 text-primary"
                     : "text-gray-400 hover:bg-white/5 hover:text-white"
                 }`
               }

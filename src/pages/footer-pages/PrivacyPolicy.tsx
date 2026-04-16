@@ -2,19 +2,19 @@ const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-200 py-20 px-6 mt-16">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#76b900] border-b border-[#76b900]/30 inline-block pb-2 mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-center text-primary border-b border-[#76b900]/30 inline-block pb-2 mb-10">
           Privacy Policy
         </h1>
 
         <div className="space-y-6 text-gray-400 text-sm leading-relaxed">
           <p>
-            At <span className="text-[#76b900] font-semibold">NextRig</span>,
+            At <span className="text-primary font-semibold">NextRig</span>,
             your privacy matters to us. This policy outlines how we collect,
             use, and protect your information when you use our website.
           </p>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               1. Information We Collect
             </h2>
             <p>
@@ -26,7 +26,7 @@ const PrivacyPolicy: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               2. How We Use Your Information
             </h2>
             <p>
@@ -37,7 +37,7 @@ const PrivacyPolicy: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               3. Data Security
             </h2>
             <p>
@@ -47,7 +47,7 @@ const PrivacyPolicy: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               4. Cookies
             </h2>
             <p>
@@ -58,18 +58,18 @@ const PrivacyPolicy: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               5. Your Rights
             </h2>
             <p>
               You can request access to, correction, or deletion of your
               personal data at any time by contacting us at{" "}
-              <span className="text-[#76b900]">support@nextrig.com</span>.
+              <span className="text-primary">support@nextrig.com</span>.
             </p>
           </div>
 
           <div>
-            <h2 className="text-xl text-[#76b900] font-semibold mb-2">
+            <h2 className="text-xl text-primary font-semibold mb-2">
               6. Updates to This Policy
             </h2>
             <p>

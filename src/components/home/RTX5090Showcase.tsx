@@ -56,13 +56,13 @@ const GPUShowcase = ({
 
       {/* Content */}
        <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col justify-center">
-        <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-2">
           {tagline}
         </p>
 
         <h1 className="text-4xl md:text-6xl font-semibold text-gray-100 mb-4 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
           {model.split(" ")[0]}{" "}
-          <span className="text-[#76b900]">
+          <span className="text-primary">
             {model.split(" ").slice(1).join(" ")}
           </span>
         </h1>
@@ -84,7 +84,7 @@ const GPUShowcase = ({
             href={learnMore}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-white/20 text-gray-300 hover:border-[#76b900] hover:text-[#76b900] font-medium text-sm transition"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-white/20 text-gray-300 hover:border-[#76b900] hover:text-primary font-medium text-sm transition"
           >
             Learn More
           </a>
@@ -93,7 +93,7 @@ const GPUShowcase = ({
 
       {/* Specs */}
       <div className="absolute bottom-6 right-6 sm:bottom-10 sm:right-10 bg-black/50 backdrop-blur-md border border-white/10 rounded-2xl p-4 sm:p-6 shadow-[0_0_25px_rgba(118,185,0,0.15)] animate-float max-w-55 sm:max-w-none">
-        <h3 className="text-[#76b900] font-semibold mb-3 text-xs sm:text-sm uppercase tracking-wider">
+        <h3 className="text-primary font-semibold mb-3 text-xs sm:text-sm uppercase tracking-wider">
           Key Specs
         </h3>
         <ul className="space-y-1 sm:space-y-2 text-gray-300 text-xs sm:text-sm">
@@ -101,7 +101,7 @@ const GPUShowcase = ({
             const Icon = s.icon;
             return (
               <li key={i} className="flex items-center gap-2">
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76b900]" />{" "}
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />{" "}
                 {s.label}
               </li>
             );

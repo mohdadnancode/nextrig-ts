@@ -204,7 +204,7 @@ const Register = () => {
           Already have an account?{" "}
           <button
             type="button"
-            className="text-[#76b900] hover:underline transition-colors"
+            className="text-primary hover:underline transition-colors"
             onClick={() => navigate("/login")}
           >
             Sign in

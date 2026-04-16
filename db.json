@@ -63,7 +63,19 @@
         "pincode": "671323",
         "mobileNumber": "9074774402"
       },
-      "cart": [],
+      "cart": [
+        {
+          "id": "54",
+          "name": "Corsair K70 CORE TKL RGB",
+          "brand": "Corsair",
+          "category": "Keyboard",
+          "price": 11999,
+          "description": "Compact mechanical keyboard with PBT keycaps and per-key RGB.",
+          "image": "https://m.media-amazon.com/images/I/71WNjISlrJL._SX679_.jpg",
+          "featured": false,
+          "quantity": 1
+        }
+      ],
       "orders": [
         {
           "id": "ORD-1766050301204",
@@ -149,9 +161,30 @@
           "cancelledAt": "2025-12-19T04:29:19.084Z"
         }
       ],
-      "wishlist": [],
+      "wishlist": [
+        {
+          "id": "26",
+          "name": "Sony PlayStation 5",
+          "brand": "Sony",
+          "category": "Gaming Console",
+          "price": 55999,
+          "description": "Next-gen gaming console with ultra-fast SSD and ray tracing support.",
+          "image": "https://m.media-amazon.com/images/I/51ljnEaW0pL._SX679_.jpg",
+          "featured": true
+        },
+        {
+          "id": "54",
+          "name": "Corsair K70 CORE TKL RGB",
+          "brand": "Corsair",
+          "category": "Keyboard",
+          "price": 11999,
+          "description": "Compact mechanical keyboard with PBT keycaps and per-key RGB.",
+          "image": "https://m.media-amazon.com/images/I/71WNjISlrJL._SX679_.jpg",
+          "featured": false
+        }
+      ],
       "createdAt": "2025-11-27T04:32:46.576Z",
-      "updatedAt": "2026-02-04T10:34:52.107Z",
+      "updatedAt": "2026-04-16T05:39:03.250Z",
       "isBlocked": false
     },
     {

@@ -11,7 +11,7 @@ const NotFound = (): JSX.Element => {
           {/* Icon */}
           <div className="flex justify-center">
             <div className="p-4 rounded-full bg-[#76b900]/10 border border-[#76b900]/20">
-              <AlertTriangle className="w-10 h-10 text-[#76b900]" />
+              <AlertTriangle className="w-10 h-10 text-primary" />
             </div>
           </div>
 
@@ -39,7 +39,7 @@ const NotFound = (): JSX.Element => {
             </Link>
             <Link
               to="/contact"
-              className="px-6 py-3 border border-white/20 text-gray-300 text-sm rounded-lg hover:text-[#76b900] hover:border-[#76b900] transition"
+              className="px-6 py-3 border border-white/20 text-gray-300 text-sm rounded-lg hover:text-primary hover:border-[#76b900] transition"
             >
               Contact Support
             </Link>

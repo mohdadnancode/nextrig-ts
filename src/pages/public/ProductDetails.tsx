@@ -76,7 +76,7 @@ const ProductDetails = (): JSX.Element => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-[#76b900] text-xl">Loading product...</div>
+        <div className="text-primary text-xl">Loading product...</div>
       </div>
     );
   }
@@ -102,7 +102,7 @@ const ProductDetails = (): JSX.Element => {
       <div className="max-w-6xl mx-auto mb-4">
         <button
           onClick={() => navigate(-1)}
-          className="text-gray-400 hover:text-[#76b900]"
+          className="text-gray-400 hover:text-primary"
         >
           ← Back to Products
         </button>
@@ -124,11 +124,11 @@ const ProductDetails = (): JSX.Element => {
           <div className="flex flex-col gap-4">
             {/* Title */}
             <div>
-              <span className="inline-block mb-2 px-3 py-1 bg-[#76b900]/20 text-[#76b900] text-xs rounded-full">
+              <span className="inline-block mb-2 px-3 py-1 bg-[#76b900]/20 text-primary text-xs rounded-full">
                 {product.category}
               </span>
               <h1 className="text-2xl font-bold">{product.name}</h1>
-              <p className="text-2xl font-bold text-[#76b900] mt-2">
+              <p className="text-2xl font-bold text-primary mt-2">
                 ₹{product.price.toLocaleString("en-IN")}
               </p>
             </div>
@@ -155,7 +155,7 @@ const ProductDetails = (): JSX.Element => {
                   className={`${
                     !canDecrease || cartLoading
                       ? "text-gray-500"
-                      : "text-[#76b900]"
+                      : "text-primary"
                   }`}
                 >
                   <Minus size={20} />
@@ -167,7 +167,7 @@ const ProductDetails = (): JSX.Element => {
                   onClick={increase}
                   disabled={cartLoading}
                   className={`${
-                    !canIncrease ? "text-gray-500" : "text-[#76b900]"
+                    !canIncrease ? "text-gray-500" : "text-primary"
                   }`}
                 >
                   <Plus size={20} />
@@ -194,7 +194,7 @@ const ProductDetails = (): JSX.Element => {
                 className={`flex-1 border py-2 rounded-lg flex items-center justify-center gap-2 transition ${
                   isWishlisted
                     ? "border-red-500 text-red-400"
-                    : "border-[#76b900] text-[#76b900]"
+                    : "border-[#76b900] text-primary"
                 }`}
               >
                 <Heart
@@ -224,7 +224,7 @@ const ProductDetails = (): JSX.Element => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
               {/* Specs */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <h3 className="text-[#76b900] font-semibold mb-2">
+                <h3 className="text-primary font-semibold mb-2">
                   Specifications
                 </h3>
                 <div className="text-sm text-gray-400 space-y-1">
@@ -244,7 +244,7 @@ const ProductDetails = (): JSX.Element => {
 
               {/* Shipping */}
               <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                <h3 className="text-[#76b900] font-semibold mb-2">
+                <h3 className="text-primary font-semibold mb-2">
                   Shipping & Returns
                 </h3>
                 <ul className="text-sm text-gray-400 space-y-2">

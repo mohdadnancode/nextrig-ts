@@ -2,19 +2,19 @@ const Returns: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-200 py-20 px-6 mt-16">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold text-center text-[#76b900] border-b border-[#76b900]/30 inline-block pb-2 mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-center text-primary border-b border-[#76b900]/30 inline-block pb-2 mb-10">
           Returns & Refund Policy
         </h1>
 
         <div className="space-y-8 text-gray-400 text-sm leading-relaxed">
           <p>
-            At <span className="text-[#76b900] font-semibold">NextRig</span>, we
+            At <span className="text-primary font-semibold">NextRig</span>, we
             want you to love what you buy. If you are not fully satisfied with
             your purchase, we're here to help.
           </p>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               1. Return Eligibility
             </h2>
             <p>
@@ -30,7 +30,7 @@ const Returns: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               2. Non-Returnable Items
             </h2>
             <p>We cannot accept returns for the following:</p>
@@ -44,7 +44,7 @@ const Returns: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               3. Refund Process
             </h2>
             <p>
@@ -57,7 +57,7 @@ const Returns: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               4. Damaged or Wrong Product
             </h2>
             <p>
@@ -69,12 +69,12 @@ const Returns: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2">
+            <h2 className="text-xl font-semibold text-primary mb-2">
               5. How to Initiate a Return
             </h2>
             <p>
               Email us at{" "}
-              <span className="text-[#76b900]">support@nextrig.com</span> with
+              <span className="text-primary">support@nextrig.com</span> with
               your order ID, reason for return, and photos if applicable. Our
               team will guide you through the process.
             </p>

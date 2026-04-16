@@ -132,7 +132,7 @@ const MyOrders: React.FC = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-[#76b900] text-xl">Loading your orders...</div>
+        <div className="text-primary text-xl">Loading your orders...</div>
       </div>
     );
   }
@@ -162,7 +162,7 @@ const MyOrders: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#76b900] mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary mb-4">
             My Orders
           </h1>
           <p className="text-gray-400 text-lg">
@@ -175,7 +175,7 @@ const MyOrders: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
             <div className="flex flex-wrap gap-4">
               <span className="flex items-center gap-2 text-sm text-gray-300">
-                <ShoppingBag size={16} className="text-[#76b900]" /> Total:
+                <ShoppingBag size={16} className="text-primary" /> Total:
                 <span className="font-semibold text-white">
                   {orders.length}
                 </span>
@@ -298,7 +298,7 @@ const MyOrders: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Total</p>
-                  <p className="font-semibold text-[#76b900]">
+                  <p className="font-semibold text-primary">
                     ₹{order.totalAmount?.toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -351,7 +351,7 @@ const MyOrders: React.FC = () => {
                   {/* Details */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
-                      <h3 className="text-lg font-semibold text-[#76b900] mb-4">
+                      <h3 className="text-lg font-semibold text-primary mb-4">
                         Order Items
                       </h3>
                       <div className="space-y-3">
@@ -375,7 +375,7 @@ const MyOrders: React.FC = () => {
                                 </p>
                               </div>
                             </div>
-                            <p className="text-[#76b900] font-semibold">
+                            <p className="text-primary font-semibold">
                               ₹
                               {(item.price * item.quantity).toLocaleString(
                                 "en-IN",
@@ -388,7 +388,7 @@ const MyOrders: React.FC = () => {
 
                     <div className="space-y-6">
                       <div>
-                        <h3 className="text-lg font-semibold text-[#76b900] mb-3">
+                        <h3 className="text-lg font-semibold text-primary mb-3">
                           Delivery Address
                         </h3>
                         {order.shippingAddress ? (
@@ -414,7 +414,7 @@ const MyOrders: React.FC = () => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-[#76b900] mb-2">
+                          <h3 className="text-lg font-semibold text-primary mb-2">
                             Payment
                           </h3>
                           <p className="text-white capitalize">
@@ -422,7 +422,7 @@ const MyOrders: React.FC = () => {
                           </p>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-[#76b900] mb-2">
+                          <h3 className="text-lg font-semibold text-primary mb-2">
                             Status
                           </h3>
                           <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ const MyOrders: React.FC = () => {
                   {/* Footer */}
                   <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
                     <span className="text-xl font-bold">Order Total:</span>
-                    <span className="text-[#76b900] text-xl font-bold">
+                    <span className="text-primary text-xl font-bold">
                       ₹{order.totalAmount?.toLocaleString("en-IN")}
                     </span>
                   </div>

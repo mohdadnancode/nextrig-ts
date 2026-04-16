@@ -9,11 +9,11 @@ const Contact: React.FC = () => {
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/70 to-black"></div>
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <RevealOnScroll>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
               Get in Touch
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold mb-4">
-              Contact <span className="text-[#76b900]">NextRig</span>
+              Contact <span className="text-primary">NextRig</span>
             </h1>
             <p className="text-gray-400 max-w-2xl mx-auto text-sm">
               Have questions about builds, orders, or partnerships? Reach out to
@@ -38,15 +38,15 @@ const Contact: React.FC = () => {
 
               <div className="space-y-5 text-sm">
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-[#76b900]" />
+                  <Mail className="w-5 h-5 text-primary" />
                   <span className="text-gray-300">support@nextrig.in</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-[#76b900]" />
+                  <Phone className="w-5 h-5 text-primary" />
                   <span className="text-gray-300">+91 98765 43210</span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-[#76b900] mt-1" />
+                  <MapPin className="w-5 h-5 text-primary mt-1" />
                   <span className="text-gray-300">
                     NextRig HQ, Tech Park Road, Bengaluru, India
                   </span>
@@ -113,7 +113,7 @@ const Contact: React.FC = () => {
             <section className="py-16 border-t border-white/5">
         <RevealOnScroll>
           <div className="max-w-6xl mx-auto px-6 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
               Find Us
             </p>
             <h2 className="text-2xl md:text-3xl font-semibold text-gray-100 mb-6">

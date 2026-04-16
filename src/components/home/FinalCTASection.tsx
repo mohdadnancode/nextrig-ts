@@ -5,7 +5,7 @@ const FinalCTASection = () => {
     <section className="border-t border-white/5 bg-linear-to-b from-black/0 via-black/40 to-black py-16">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-[#76b900] mb-2">
+          <p className="text-xs uppercase tracking-[0.35em] text-primary mb-2">
             Ready when you are
           </p>
           <h2 className="text-2xl sm:text-3xl font-semibold text-gray-50">
@@ -26,7 +26,7 @@ const FinalCTASection = () => {
           </Link>
           <Link
             to="/contact"
-            className="text-sm text-gray-300 hover:text-[#76b900] transition-colors"
+            className="text-sm text-gray-300 hover:text-primary transition-colors"
           >
             Need a custom spec?
           </Link>

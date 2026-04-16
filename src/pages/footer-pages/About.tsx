@@ -43,11 +43,11 @@ const About: React.FC = () => {
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/70 to-black" />
         <div className="max-w-6xl mx-auto px-6 relative z-10 text-center">
           <RevealOnScroll>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
               Who We Are
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold mb-4">
-              About <span className="text-[#76b900]">NextRig</span>
+              About <span className="text-primary">NextRig</span>
             </h1>
             <p className="text-gray-400 max-w-2xl mx-auto text-sm">
               NextRig was born out of frustration with overpriced prebuilt PCs
@@ -96,7 +96,7 @@ const About: React.FC = () => {
             {values.map(({ icon: Icon, title, desc }) => (
               <RevealOnScroll key={title}>
                 <div className="border border-white/10 rounded-2xl bg-black/40 p-8">
-                  <Icon className="w-6 h-6 text-[#76b900] mx-auto mb-3" />
+                  <Icon className="w-6 h-6 text-primary mx-auto mb-3" />
                   <h3 className="text-lg font-medium">{title}</h3>
                   <p className="text-gray-400 text-sm mt-2">{desc}</p>
                 </div>

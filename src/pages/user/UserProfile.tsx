@@ -149,7 +149,7 @@ const UserProfile: React.FC = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-[#76b900] text-xl">Loading profile...</div>
+        <div className="text-primary text-xl">Loading profile...</div>
       </div>
     );
   }
@@ -173,7 +173,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-100 py-8 px-4 mt-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#76b900] text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-primary text-center mb-8">
           Profile Settings
         </h1>
 
@@ -212,7 +212,7 @@ const UserProfile: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Personal Info */}
             <div>
-              <h2 className="text-2xl font-semibold text-[#76b900] mb-6">
+              <h2 className="text-2xl font-semibold text-primary mb-6">
                 Personal Information
               </h2>
 
@@ -268,7 +268,7 @@ const UserProfile: React.FC = () => {
 
             {/* Address Info */}
             <div>
-              <h2 className="text-2xl font-semibold text-[#76b900] mb-6">
+              <h2 className="text-2xl font-semibold text-primary mb-6">
                 Address Information
               </h2>
 

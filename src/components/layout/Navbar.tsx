@@ -45,7 +45,7 @@ const Navbar = () => {
 
   if (authLoading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 bg-[#0d0d0d] h-16 flex items-center justify-center text-[#76b900]">
+      <nav className="fixed top-0 left-0 right-0 bg-[#0d0d0d] h-16 flex items-center justify-center text-primary">
         <span>Loading...</span>
       </nav>
     );
@@ -78,7 +78,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold text-[#76b900] hover:opacity-80 transition-opacity hover:drop-shadow-[0_0_10px_#76b900]"
+          className="text-2xl font-bold text-primary hover:opacity-80 transition-opacity hover:drop-shadow-[0_0_10px_#76b900]"
         >
           NextRig
         </Link>
@@ -91,8 +91,8 @@ const Navbar = () => {
               to={link.path}
               className={`relative text-sm font-medium transition-colors group ${
                 isActive(link.path)
-                  ? "text-[#76b900]"
-                  : "text-gray-300 hover:text-[#76b900]"
+                  ? "text-primary"
+                  : "text-gray-300 hover:text-primary"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setShowDropdown((prev) => !prev)}
-                className="flex items-center gap-3 text-sm font-medium text-gray-300 hover:text-[#76b900] transition-colors group"
+                className="flex items-center gap-3 text-sm font-medium text-gray-300 hover:text-primary transition-colors group"
               >
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-transparent group-hover:border-[#76b900] transition-colors overflow-hidden flex items-center justify-center">
@@ -146,21 +146,21 @@ const Navbar = () => {
                   <Link
                     to="/profile"
                     onClick={() => setShowDropdown(false)}
-                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-[#76b900] transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-primary transition-colors"
                   >
                     <i className="fas fa-user w-4"></i> Profile
                   </Link>
                   <Link
                     to="/orders"
                     onClick={() => setShowDropdown(false)}
-                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-[#76b900] transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-primary transition-colors"
                   >
                     <i className="fas fa-shopping-bag w-4"></i> My Orders
                   </Link>
                   <Link
                     to="/wishlist"
                     onClick={() => setShowDropdown(false)}
-                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-[#76b900] transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-primary transition-colors"
                   >
                     <i className="fas fa-heart w-4"></i> Wishlist{" "}
                     {wishlistCount > 0 && (
@@ -184,8 +184,8 @@ const Navbar = () => {
               to="/login"
               className={`relative text-sm font-medium transition-colors group ${
                 isActive("/login") || isActive("/register")
-                  ? "text-[#76b900]"
-                  : "text-gray-300 hover:text-[#76b900]"
+                  ? "text-primary"
+                  : "text-gray-300 hover:text-primary"
               }`}
             >
               <i className="fas fa-sign-in-alt mr-1"></i> Login
@@ -202,7 +202,7 @@ const Navbar = () => {
 
         {/* Mobile Right Icons */}
         <div className="md:hidden flex items-center gap-4">
-          <Link to="/cart" className="relative text-gray-300 hover:text-[#76b900]">
+          <Link to="/cart" className="relative text-gray-300 hover:text-primary">
             <i className="fa-solid fa-cart-shopping text-xl"></i>
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#76b900] text-black text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
@@ -213,7 +213,7 @@ const Navbar = () => {
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="text-gray-300 hover:text-[#76b900] text-2xl"
+            className="text-gray-300 hover:text-primary text-2xl"
           >
             <i className={`fa-solid ${menuOpen ? "fa-xmark" : "fa-bars"}`}></i>
           </button>
@@ -234,8 +234,8 @@ const Navbar = () => {
               onClick={() => setMenuOpen(false)}
               className={`text-lg font-medium ${
                 isActive(link.path)
-                  ? "text-[#76b900]"
-                  : "hover:text-[#76b900]"
+                  ? "text-primary"
+                  : "hover:text-primary"
               }`}
             >
               {link.label}

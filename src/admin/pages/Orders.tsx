@@ -220,7 +220,7 @@ const Orders = () => {
             setSortBy("newest");
             setStatusFilter("all");
           }}
-          className="border border-white/20 px-4 py-2 rounded text-gray-300 hover:text-[#76b900]"
+          className="border border-white/20 px-4 py-2 rounded text-gray-300 hover:text-primary"
         >
           Clear Filters
         </button>
@@ -261,7 +261,7 @@ const Orders = () => {
                     {new Date(o.date).toLocaleDateString("en-IN")}
                   </td>
 
-                  <td className="p-3 font-semibold text-[#76b900]">
+                  <td className="p-3 font-semibold text-primary">
                     ₹{getOrderTotal(o)?.toLocaleString("en-IN")}
                   </td>
 
@@ -302,7 +302,7 @@ const Orders = () => {
                   <td className="p-3">
                     <button
                       onClick={() => toggleDetails(o.id)}
-                      className="text-[#76b900] hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {expandedOrder === o.id ? "Hide" : "View"}
                     </button>

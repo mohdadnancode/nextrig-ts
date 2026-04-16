@@ -185,7 +185,7 @@ function Products(): JSX.Element {
   /* ------------------ Initial Loading ------------------ */
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center text-[#76b900] text-xl">
+      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center text-primary text-xl">
         Loading products...
       </div>
     );
@@ -286,7 +286,7 @@ function Products(): JSX.Element {
               sortOrder !== "default") && (
               <button
                 onClick={clearAllFilters}
-                className="px-4 py-3 border border-white/10 rounded-lg text-gray-300 hover:text-[#76b900] hover:border-[#76b900]/60 transition-all"
+                className="px-4 py-3 border border-white/10 rounded-lg text-gray-300 hover:text-primary hover:border-[#76b900]/60 transition-all"
               >
                 Clear All
               </button>
@@ -319,7 +319,7 @@ function Products(): JSX.Element {
 
             {/* Loading more indicator */}
             {loadingMore && visibleCount < filteredProducts.length && (
-              <div className="text-center text-[#76b900] mt-6 animate-pulse">
+              <div className="text-center text-primary mt-6 animate-pulse">
                 Loading more products...
               </div>
             )}

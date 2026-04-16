@@ -62,7 +62,7 @@ const ProductHighlights = () => {
   if (loading) {
     return (
       <div className="bg-[#0d0d0d] text-white py-16 text-center">
-        <p className="text-[#76b900] text-lg animate-pulse">
+        <p className="text-primary text-lg animate-pulse">
           Loading featured products...
         </p>
       </div>
@@ -102,7 +102,7 @@ const ProductHighlights = () => {
           {/* Navigation buttons */}
           <button
             onClick={scrollLeft}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll left"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ const ProductHighlights = () => {
 
           <button
             onClick={scrollRight}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-[#76b900] items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll right"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,19 +139,19 @@ const ProductHighlights = () => {
                     className="object-contain w-full h-full transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="absolute top-2 left-2 bg-[#76b900]/20 border border-[#76b900]/30 text-[#76b900] text-[10px] font-semibold px-2 py-0.5 rounded">
+                  <span className="absolute top-2 left-2 bg-[#76b900]/20 border border-[#76b900]/30 text-primary text-[10px] font-semibold px-2 py-0.5 rounded">
                     {product.category}
                   </span>
                 </div>
 
                 {/* Info */}
                 <div className="p-3 flex flex-col justify-between h-30">
-                  <h3 className="text-white font-medium text-sm line-clamp-2 group-hover:text-[#76b900] transition-colors">
+                  <h3 className="text-white font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
                     {product.name}
                   </h3>
 
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-lg font-bold text-[#76b900]">
+                    <span className="text-lg font-bold text-primary">
                       ₹{product.price.toLocaleString("en-IN")}
                     </span>
                     <Link
@@ -171,7 +171,7 @@ const ProductHighlights = () => {
         <div className="text-center mt-8">
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#76b900] text-[#76b900] hover:bg-[#76b900] hover:text-black text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_15px_rgba(118,185,0,0.3)]"
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#76b900] text-primary hover:bg-[#76b900] hover:text-black text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_15px_rgba(118,185,0,0.3)]"
           >
             <span>View All Products</span>
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

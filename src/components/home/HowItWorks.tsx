@@ -14,17 +14,17 @@ type Step = {
 const HowItWorks = () => {
   const steps: Step[] = [
     {
-      icon: <Monitor className="w-8 h-8 text-[#76b900]" />,
+      icon: <Monitor className="w-8 h-8 text-primary" />,
       title: "Pick Your Build",
       desc: "Choose a pre-optimized setup or customize one based on your games and workload.",
     },
     {
-      icon: <Wrench className="w-8 h-8 text-[#76b900]" />,
+      icon: <Wrench className="w-8 h-8 text-primary" />,
       title: "We Assemble & Test",
       desc: "Our technicians build, cable-manage, and stress-test every rig to ensure perfection.",
     },
     {
-      icon: <Truck className="w-8 h-8 text-[#76b900]" />,
+      icon: <Truck className="w-8 h-8 text-primary" />,
       title: "Delivered Ready to Game",
       desc: "Plug in, power on, and start gaming instantly — no setup headache, no bloatware.",
     },
@@ -33,7 +33,7 @@ const HowItWorks = () => {
   return (
     <section className="border-t border-white/5 py-20 bg-linear-to-b from-black/0 via-black/40 to-black/80">
       <div className="max-w-6xl mx-auto px-6 text-center">
-        <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
           Simple Process
         </p>
         <h2 className="text-3xl md:text-4xl font-semibold text-gray-100 mb-12">

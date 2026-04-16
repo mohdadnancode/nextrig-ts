@@ -35,7 +35,7 @@ const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
       <p className="text-gray-400 text-sm">{title}</p>
       <p className="text-2xl font-bold">{value}</p>
     </div>
-    <Icon className="text-[#76b900]" />
+    <Icon className="text-primary" />
   </div>
 );
 // HELPERS

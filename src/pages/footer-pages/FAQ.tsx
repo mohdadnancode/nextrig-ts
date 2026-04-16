@@ -44,11 +44,11 @@ const FAQ: React.FC = () => {
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/70 to-black"></div>
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <RevealOnScroll>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
               Need Help?
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold mb-4">
-              FAQ & <span className="text-[#76b900]">Support</span>
+              FAQ & <span className="text-primary">Support</span>
             </h1>
             <p className="text-gray-400 max-w-2xl mx-auto text-sm">
               Here are some of the most common questions we get about ordering, shipping,
@@ -83,7 +83,7 @@ const FAQ: React.FC = () => {
                       {item.q}
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-[#76b900] transition-transform ${
+                      className={`w-5 h-5 text-primary transition-transform ${
                         openIndex === i ? "rotate-180" : ""
                       }`}
                     />
@@ -108,7 +108,7 @@ const FAQ: React.FC = () => {
       {/* Contact CTA */}
       <section className="py-16 text-center border-t border-white/5">
         <RevealOnScroll>
-          <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+          <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
             Still Have Questions?
           </p>
           <h2 className="text-2xl md:text-3xl font-semibold mb-3">

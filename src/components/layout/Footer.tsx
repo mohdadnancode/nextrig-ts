@@ -19,7 +19,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/about"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   About
                 </Link>
@@ -27,7 +27,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   Contact
                 </Link>
@@ -35,7 +35,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/careers"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   Careers
                 </Link>
@@ -52,7 +52,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   FAQ
                 </Link>
@@ -60,7 +60,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/returns"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   Returns
                 </Link>
@@ -68,7 +68,7 @@ const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="text-sm text-gray-400 hover:text-[#76b900] transition-colors"
+                  className="text-sm text-gray-400 hover:text-primary transition-colors"
                 >
                   Privacy Policy
                 </Link>
@@ -84,7 +84,7 @@ const Footer = () => {
         <div className="mt-10 pt-6 border-t border-gray-800 text-center">
           <p className="text-xs text-gray-500">
             © {new Date().getFullYear()}{" "}
-            <span className="text-[#76b900] font-medium">NextRig</span>. All
+            <span className="text-primary font-medium">NextRig</span>. All
             rights reserved.
           </p>
         </div>

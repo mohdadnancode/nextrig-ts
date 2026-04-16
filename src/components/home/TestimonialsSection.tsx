@@ -39,7 +39,7 @@ const TestimonialsSection = () => {
   return (
     <section className="border-t border-white/5 py-20 bg-linear-to-b from-black/0 via-black/50 to-black/90">
       <div className="max-w-6xl mx-auto px-6 text-center">
-        <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-3">
+        <p className="text-xs uppercase tracking-[0.3em] text-primary mb-3">
           Trusted by Gamers
         </p>
         <h2 className="text-3xl md:text-4xl font-semibold text-gray-100 mb-12">
@@ -61,7 +61,7 @@ const TestimonialsSection = () => {
                 <p className="text-gray-300 text-sm italic mb-4">
                   “{t.text}”
                 </p>
-                <h3 className="text-[#76b900] font-medium text-sm">
+                <h3 className="text-primary font-medium text-sm">
                   {t.name}
                 </h3>
                 <p className="text-gray-500 text-xs">{t.role}</p>

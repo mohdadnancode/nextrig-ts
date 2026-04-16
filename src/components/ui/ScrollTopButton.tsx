@@ -32,7 +32,7 @@ const ScrollTopButton = () => {
         bg-white/10 backdrop-blur-md border border-[#76b900]/50 shadow-[0_0_15px_#76b90033]
         hover:shadow-[0_0_25px_#76b900aa] hover:scale-110`}
     >
-      <ArrowUp className="text-[#76b900]" size={22} />
+      <ArrowUp className="text-primary" size={22} />
     </button>
   );
 };

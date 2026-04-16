@@ -309,7 +309,7 @@ const Checkout: React.FC = () => {
       <div className="min-h-screen bg-[#0d0d0d] text-gray-100 flex items-center justify-center p-4">
         <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-8 max-w-md w-full text-center">
           <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-3xl font-bold text-[#76b900] mb-4">
+          <h1 className="text-3xl font-bold text-primary mb-4">
             Order Successful
           </h1>
           <p className="text-gray-300 mb-6">
@@ -337,14 +337,14 @@ const Checkout: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-100 py-8 px-4 mt-12">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#76b900] text-center mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold text-primary text-center mb-8">
           Checkout
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-[#76b900]">
+            <h2 className="text-2xl font-semibold mb-6 text-primary">
               Order Summary
             </h2>
 
@@ -360,7 +360,7 @@ const Checkout: React.FC = () => {
                       Qty: {item.quantity}
                     </p>
                   </div>
-                  <p className="text-[#76b900] font-semibold">
+                  <p className="text-primary font-semibold">
                     ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -376,7 +376,7 @@ const Checkout: React.FC = () => {
               )}
               <div className="flex justify-between items-center text-xl font-bold">
                 <span>Total Amount:</span>
-                <span className="text-[#76b900]">
+                <span className="text-primary">
                   ₹{finalTotal.toLocaleString("en-IN")}
                 </span>
               </div>
@@ -385,7 +385,7 @@ const Checkout: React.FC = () => {
 
           {/* Delivery & Payment */}
           <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-6">
-            <h2 className="text-2xl font-semibold mb-6 text-[#76b900]">
+            <h2 className="text-2xl font-semibold mb-6 text-primary">
               Delivery Details
             </h2>
 
@@ -398,7 +398,7 @@ const Checkout: React.FC = () => {
                 {hasSavedAddress && (
                   <button
                     onClick={() => setIsEditingAddress(!isEditingAddress)}
-                    className="text-[#76b900] hover:text-[#68a500] text-sm font-medium transition-colors"
+                    className="text-primary hover:text-[#68a500] text-sm font-medium transition-colors"
                   >
                     {isEditingAddress ? "Cancel" : "Change Address"}
                   </button>
@@ -548,7 +548,7 @@ const Checkout: React.FC = () => {
                           e.target.value as PaymentMethod,
                         )
                       }
-                      className="text-[#76b900] focus:ring-[#76b900]"
+                      className="text-primary focus:ring-[#76b900]"
                     />
                     <span className="text-white">
                       {method === "cod"

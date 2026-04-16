@@ -151,7 +151,7 @@ const Users = () => {
               <tr key={u.id} className="border-b border-white/5">
                 <td className="p-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#76b900]/20 text-[#76b900] flex items-center justify-center font-bold">
+                    <div className="w-9 h-9 rounded-full bg-[#76b900]/20 text-primary flex items-center justify-center font-bold">
                       {u.username?.charAt(0)}
                     </div>
                     <div>
@@ -181,7 +181,7 @@ const Users = () => {
 
                 <td className="p-3">{u.orders?.length || 0}</td>
 
-                <td className="p-3 text-[#76b900] font-semibold">
+                <td className="p-3 text-primary font-semibold">
                   ₹{getTotalSpent(u).toLocaleString("en-IN")}
                 </td>
 
@@ -203,7 +203,7 @@ const Users = () => {
 
                     <button
                       onClick={() => setSelectedUser(u)}
-                      className="px-3 py-1 rounded bg-[#76b900]/20 text-[#76b900]"
+                      className="px-3 py-1 rounded bg-[#76b900]/20 text-primary"
                     >
                       View
                     </button>
@@ -229,7 +229,7 @@ const Users = () => {
 
             {/* HEADER */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-full bg-[#76b900]/20 text-[#76b900] flex items-center justify-center text-xl font-bold">
+              <div className="w-14 h-14 rounded-full bg-[#76b900]/20 text-primary flex items-center justify-center text-xl font-bold">
                 {selectedUser.username?.charAt(0)}
               </div>
               <div>

@@ -92,7 +92,7 @@ const CategoriesSection = () => {
   if (loading) {
     return (
       <div className="bg-[#0d0d0d] text-white py-16 text-center">
-        <p className="text-[#76b900] text-lg animate-pulse">
+        <p className="text-primary text-lg animate-pulse">
           Loading categories...
         </p>
       </div>
@@ -148,7 +148,7 @@ const CategoriesSection = () => {
                   />
                   <div className="absolute inset-0 rounded-full border border-[#76b900]/40 group-hover:border-[#76b900] transition-all duration-300" />
                 </div>
-                <p className="mt-3 text-gray-200 font-medium text-sm sm:text-base group-hover:text-[#76b900] transition-colors duration-200">
+                <p className="mt-3 text-gray-200 font-medium text-sm sm:text-base group-hover:text-primary transition-colors duration-200">
                   {category}
                 </p>
               </div>
@@ -160,7 +160,7 @@ const CategoriesSection = () => {
         <div className="text-center mt-10">
           <button
             onClick={() => navigate("/products")}
-            className="inline-flex items-center gap-2 px-6 py-2.5 border border-[#76b900] text-[#76b900] hover:bg-[#76b900] hover:text-black font-semibold rounded-lg text-sm transition-all duration-300 hover:shadow-[0_0_20px_rgba(118,185,0,0.3)]"
+            className="inline-flex items-center gap-2 px-6 py-2.5 border border-[#76b900] text-primary hover:bg-[#76b900] hover:text-black font-semibold rounded-lg text-sm transition-all duration-300 hover:shadow-[0_0_20px_rgba(118,185,0,0.3)]"
           >
             View All Products
             <svg

@@ -19,7 +19,7 @@ const Wishlist: React.FC = () => {
   if (authLoading || wishlistLoading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <p className="text-[#76b900] text-lg">Loading your wishlist...</p>
+        <p className="text-primary text-lg">Loading your wishlist...</p>
       </div>
     );
   }
@@ -159,7 +159,7 @@ const Wishlist: React.FC = () => {
                 {/* Category Badge */}
                 {product.category && (
                   <div className="absolute top-3 left-3">
-                    <span className="bg-[#76b900]/20 text-[#76b900] text-xs px-2 py-1 rounded-md border border-[#76b900]/30">
+                    <span className="bg-[#76b900]/20 text-primary text-xs px-2 py-1 rounded-md border border-[#76b900]/30">
                       {product.category}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ const Wishlist: React.FC = () => {
                   <h3 className="text-white font-semibold text-sm md:text-base line-clamp-2 mb-2">
                     {product.name}
                   </h3>
-                  <p className="text-[#76b900] font-bold text-sm md:text-base">
+                  <p className="text-primary font-bold text-sm md:text-base">
                     ₹{product.price.toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -200,7 +200,7 @@ const Wishlist: React.FC = () => {
 
                   <Link
                     to={`/products/${product.id}`}
-                    className="flex-1 border border-[#76b900] text-[#76b900] hover:bg-[#76b900] hover:text-black font-semibold text-sm px-4 py-2 rounded-md transition-all duration-300 flex items-center justify-center gap-2"
+                    className="flex-1 border border-[#76b900] text-primary hover:bg-[#76b900] hover:text-black font-semibold text-sm px-4 py-2 rounded-md transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     <span>View</span>
                   </Link>

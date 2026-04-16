@@ -5,7 +5,7 @@ const Careers: React.FC = () => {
     <div className="min-h-screen bg-[#0d0d0d] text-gray-200 py-20 px-6 mt-16">
       <div className="max-w-5xl mx-auto text-center">
         {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-[#76b900] border-b border-[#76b900]/30 inline-block pb-2 mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-primary border-b border-[#76b900]/30 inline-block pb-2 mb-10">
           Careers at NextRig
         </h1>
 
@@ -13,13 +13,13 @@ const Careers: React.FC = () => {
         <p className="text-gray-400 max-w-2xl mx-auto mb-12 text-sm leading-relaxed">
           We're a passionate team of gamers, designers, and developers building
           the next generation of gaming experiences. At{" "}
-          <span className="text-[#76b900] font-semibold">NextRig</span>, we
+          <span className="text-primary font-semibold">NextRig</span>, we
           don't just sell components — we power creativity and innovation.
         </p>
 
         {/* Hiring Section */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md mb-12 hover:border-[#76b900]/40 transition-all duration-300">
-          <Rocket size={40} className="text-[#76b900] mx-auto mb-4" />
+          <Rocket size={40} className="text-primary mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">
             We're not hiring right now
           </h2>
@@ -32,7 +32,7 @@ const Careers: React.FC = () => {
             Drop your resume or portfolio at
             <a
               href="mailto:careers@nextrig.com"
-              className="text-[#76b900] hover:underline ml-1"
+              className="text-primary hover:underline ml-1"
             >
               careers@nextrig.com
             </a>
@@ -42,7 +42,7 @@ const Careers: React.FC = () => {
         {/* Future Roles */}
         <div className="text-left space-y-8">
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-primary mb-2 flex items-center gap-2">
               <Briefcase size={20} /> Future Roles We'll Open
             </h2>
             <ul className="list-disc ml-6 text-gray-400 space-y-1 text-sm">
@@ -55,7 +55,7 @@ const Careers: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-[#76b900] mb-2 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-primary mb-2 flex items-center gap-2">
               <Mail size={20} /> Stay Connected
             </h2>
             <p className="text-gray-400 text-sm">

@@ -138,7 +138,7 @@ const Login = () => {
           Don&apos;t have an account?{" "}
           <button
             type="button"
-            className="text-[#76b900] hover:underline"
+            className="text-primary hover:underline"
             onClick={() => navigate("/register")}
           >
             Create one

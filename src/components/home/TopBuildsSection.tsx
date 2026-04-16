@@ -57,7 +57,7 @@ const TopBuildsSection = () => {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#76b900] mb-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary mb-2">
               Featured Builds
             </p>
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-100">
@@ -66,7 +66,7 @@ const TopBuildsSection = () => {
           </div>
           <Link
             to="/products"
-            className="text-sm text-gray-300 hover:text-[#76b900] transition-colors mt-4 sm:mt-0"
+            className="text-sm text-gray-300 hover:text-primary transition-colors mt-4 sm:mt-0"
           >
             View All Builds →
           </Link>
@@ -94,9 +94,9 @@ const TopBuildsSection = () => {
                   {build.name}
                 </h3>
                 <p className="text-sm text-gray-400">{build.specs}</p>
-                <p className="text-[#76b900] font-semibold">{build.price}</p>
+                <p className="text-primary font-semibold">{build.price}</p>
 
-                <button className="mt-3 flex items-center gap-2 text-sm font-medium text-[#76b900] hover:text-[#9eff45] transition-colors">
+                <button className="mt-3 flex items-center gap-2 text-sm font-medium text-primary hover:text-[#9eff45] transition-colors">
                   <ShoppingCart size={16} />
                   Add to Cart
                 </button>

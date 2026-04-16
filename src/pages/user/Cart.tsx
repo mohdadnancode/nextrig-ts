@@ -19,7 +19,7 @@ const Cart: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-[#76b900] text-xl">Loading cart...</div>
+        <div className="text-primary text-xl">Loading cart...</div>
       </div>
     );
   }
@@ -31,7 +31,7 @@ const Cart: React.FC = () => {
         <div className="text-center">
           <h2 className="text-3xl font-semibold mb-8">
             Your cart is empty{" "}
-            <i className="fa-solid fa-cart-shopping text-[#76b900]"></i>
+            <i className="fa-solid fa-cart-shopping text-primary"></i>
           </h2>
           <Link
             to="/products"
@@ -88,7 +88,7 @@ const Cart: React.FC = () => {
                     <h3 className="text-lg sm:text-xl font-semibold mb-2 truncate">
                       {item.name}
                     </h3>
-                    <p className="text-[#76b900] text-lg font-medium mb-3">
+                    <p className="text-primary text-lg font-medium mb-3">
                       ₹{item.price.toLocaleString("en-IN")} each
                     </p>
 
@@ -123,7 +123,7 @@ const Cart: React.FC = () => {
 
                   {/* Item Total & Remove */}
                   <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
-                    <p className="text-xl font-semibold text-[#76b900]">
+                    <p className="text-xl font-semibold text-primary">
                       ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                     </p>
                     <button
@@ -147,7 +147,7 @@ const Cart: React.FC = () => {
               <p className="text-gray-400 text-sm uppercase tracking-wider mb-1">
                 Total Amount
               </p>
-              <p className="text-3xl font-bold text-[#76b900]">
+              <p className="text-3xl font-bold text-primary">
                 ₹{totalPrice.toLocaleString("en-IN")}
               </p>
             </div>

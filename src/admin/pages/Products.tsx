@@ -191,7 +191,7 @@ const Products = () => {
 
         <button
           onClick={clearFilters}
-          className="border border-white/10 rounded hover:text-[#76b900]"
+          className="border border-white/10 rounded hover:text-primary"
         >
           Clear
         </button>

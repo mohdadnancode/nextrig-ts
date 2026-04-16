@@ -36,7 +36,7 @@ const App: React.FC = () => {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen bg-[#0d0d0d] text-[#76b900] text-lg font-medium">
+        <div className="flex items-center justify-center min-h-screen bg-[#0d0d0d] text-primary text-lg font-medium">
           Loading...
         </div>
       }

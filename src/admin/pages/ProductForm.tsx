@@ -118,7 +118,7 @@ const ProductForm = () => {
         <button
           type="button"
           onClick={() => navigate("/admin/products")}
-          className="flex items-center gap-1 text-sm text-gray-400 hover:text-[#76b900]"
+          className="flex items-center gap-1 text-sm text-gray-400 hover:text-primary"
         >
           <ArrowLeft size={16} />
           Back to Products

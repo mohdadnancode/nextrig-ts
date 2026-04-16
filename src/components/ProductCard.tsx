@@ -74,7 +74,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Category Badge */}
         <div className="absolute top-3 left-3">
-          <span className="bg-[#76b900]/20 text-[#76b900] text-xs px-2 py-1 rounded-md border border-[#76b900]/30">
+          <span className="bg-[#76b900]/20 text-primary text-xs px-2 py-1 rounded-md border border-[#76b900]/30">
             {product.category}
           </span>
         </div>
@@ -103,10 +103,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Info */}
       <div className="p-4 flex flex-col justify-between flex-1">
         <div>
-          <h3 className="text-white font-semibold text-sm truncate mb-1 group-hover:text-[#76b900] transition-colors">
+          <h3 className="text-white font-semibold text-sm truncate mb-1 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <p className="text-[#76b900] font-bold text-sm">
+          <p className="text-primary font-bold text-sm">
             ₹{product.price.toLocaleString("en-IN")}
           </p>
         </div>
@@ -132,7 +132,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               className={`px-2 text-lg font-bold ${
                 !canDecrease || controlLoading
                   ? "text-gray-500"
-                  : "text-[#76b900]"
+                  : "text-primary"
               }`}
             >
               <Minus size={20} />
@@ -145,7 +145,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <button
               onClick={increase}
               disabled={controlLoading}
-              className={`${!canIncrease ? "text-gray-500" : "text-[#76b900]"}`}
+              className={`${!canIncrease ? "text-gray-500" : "text-primary"}`}
             >
               <Plus size={20} />
             </button>

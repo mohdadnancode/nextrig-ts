@@ -47,7 +47,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="w-9 h-9 rounded-full bg-[#76b900]/20 border border-[#76b900]/40 flex items-center justify-center text-[#76b900] font-bold">
+          <div className="w-9 h-9 rounded-full bg-[#76b900]/20 border border-[#76b900]/40 flex items-center justify-center text-primary font-bold">
             {user?.username?.[0]?.toUpperCase() ?? "A"}
           </div>
 
