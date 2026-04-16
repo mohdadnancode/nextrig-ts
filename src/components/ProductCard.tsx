@@ -122,7 +122,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               disabled={cartLoading}
               className="mt-3 w-full rounded-lg border border-primary/40 bg-primary text-black font-semibold py-2 transition hover:bg-primaryDark flex items-center justify-center gap-2"
             >
-              <span>Add to Cart</span>
+              <span>Add</span>
               <ShoppingCart size={16} />
             </button>
           ) : (
