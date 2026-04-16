@@ -3,7 +3,8 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import { useCartControls } from "../context/useCartControls";
-import { Heart, ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
+import { Heart, ShoppingCart, Plus, Minus, Trash2, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import type { Product } from "../types/product";
 import type { MouseEvent } from "react";
@@ -23,8 +24,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { user } = useAuth();
 
   const cartItem = cart.find((item) => item.id === product.id);
-  const quantity = cartItem?.quantity ?? 0;
-  const maxStock = product.stock ?? 10;
+  const quantity: number = cartItem?.quantity ?? 0;
+  const maxStock: number = product.stock ?? 10;
 
   const {
     increase,
@@ -57,112 +58,107 @@ const ProductCard = ({ product }: ProductCardProps) => {
     toggleWishlist(product);
   };
 
-  const wishlisted = isInWishlist(product.id);
+  const wishlisted: boolean = isInWishlist(product.id);
 
   return (
-    <div
-      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-xl hover:border-[#76b900]/40 hover:shadow-[0_0_15px_#76b90033] hover:-translate-y-2 transition-all duration-300 flex flex-col cursor-pointer h-full"
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -4 }}
       onClick={handleProductClick}
+      className="group relative flex flex-col h-full cursor-pointer rounded-2xl border border-white/10 bg-[#0b0f0e] transition-all duration-300 hover:border-primary/40"
     >
       {/* Image */}
-      <div className="relative overflow-hidden rounded-t-xl bg-gray-800/50 aspect-square flex items-center justify-center p-4">
+      <div className="relative h-[160px] bg-black/40 flex items-center justify-center p-4">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-36 object-contain group-hover:scale-110 transition-transform duration-300"
+          className="h-28 object-contain transition-transform duration-300 group-hover:scale-105"
         />
 
-        {/* Category Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="bg-[#76b900]/20 text-primary text-xs px-2 py-1 rounded-md border border-[#76b900]/30">
-            {product.category}
-          </span>
-        </div>
-
-        {/* Wishlist Button */}
+        {/* Wishlist */}
         <button
           onClick={handleWishlistToggle}
           disabled={loading}
-          className={`absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 ${
-            wishlisted
-              ? "bg-red-500/10 hover:bg-red-500/20"
-              : "bg-white/10 hover:bg-white/20"
-          }`}
+          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full bg-black/60 border border-white/10 hover:border-primary/40 transition"
         >
           <Heart
             size={16}
-            className={`transition-all duration-300 ${
+            className={`transition ${
               wishlisted
                 ? "fill-red-500 text-red-500"
-                : "text-gray-400 hover:text-red-400 hover:fill-red-400"
-            } ${loading ? "animate-pulse" : ""}`}
+                : "text-gray-400 hover:text-red-400"
+            }`}
           />
         </button>
       </div>
 
-      {/* Info */}
-      <div className="p-4 flex flex-col justify-between flex-1">
-        <div>
-          <h3 className="text-white font-semibold text-sm truncate mb-1 group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
-          <p className="text-primary font-bold text-sm">
-            ₹{product.price.toLocaleString("en-IN")}
-          </p>
+      {/* Content */}
+      <div className="p-3 flex flex-col flex-1">
+        {/* Category / Brand */}
+        <div className="flex items-center gap-2 mb-1">
+          <Zap size={12} className="text-primary/60" />
+          <span className="text-[10px] uppercase tracking-wide text-gray-500">
+            {product.category}
+          </span>
         </div>
 
-        {quantity === 0 ? (
-          <button
-            onClick={handleAddToCart}
-            disabled={cartLoading}
-            className="mt-3 w-full bg-[#76b900] hover:bg-[#68a500] disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold text-sm px-3 py-2 rounded-md transition-all duration-300 flex items-center justify-center gap-1"
-          >
-            <span>Add</span>
-            <ShoppingCart size={16} />
-          </button>
-        ) : (
-          <div
-            className="mt-3 w-full flex items-center justify-between bg-black/40 border border-[#76b900]/40 rounded-md px-2 py-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Minus */}
-            <button
-              disabled={!canDecrease || controlLoading}
-              onClick={decrease}
-              className={`px-2 text-lg font-bold ${
-                !canDecrease || controlLoading
-                  ? "text-gray-500"
-                  : "text-primary"
-              }`}
-            >
-              <Minus size={20} />
-            </button>
+        {/* Title */}
+        <h3 className="text-sm font-medium text-gray-200 leading-snug line-clamp-2 group-hover:text-white transition">
+          {product.name}
+        </h3>
 
-            {/* Quantity */}
-            <span className="text-white font-semibold text-sm">{quantity}</span>
+        {/* Price */}
+        <div className="mt-auto pt-3">
+          <p className="text-lg font-semibold text-primary">
+            ₹{product.price.toLocaleString("en-IN")}
+          </p>
 
-            {/* Plus */}
+          {/* Actions */}
+          {quantity === 0 ? (
             <button
-              onClick={increase}
-              disabled={controlLoading}
-              className={`${!canIncrease ? "text-gray-500" : "text-primary"}`}
+              onClick={handleAddToCart}
+              disabled={cartLoading}
+              className="mt-3 w-full rounded-lg border border-primary/40 bg-primary text-black font-semibold py-2 transition hover:bg-primaryDark flex items-center justify-center gap-2"
             >
-              <Plus size={20} />
+              <span>Add to Cart</span>
+              <ShoppingCart size={16} />
             </button>
+          ) : (
+            <div
+              className="mt-3 flex items-center justify-between bg-black/50 border border-primary/30 rounded-lg px-3 py-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                disabled={!canDecrease || controlLoading}
+                onClick={decrease}
+                className="text-primary disabled:text-gray-500"
+              >
+                <Minus size={18} />
+              </button>
 
-            {/* Delete */}
-            <button
-              onClick={remove}
-              disabled={controlLoading}
-              className="ml-2 text-red-400 hover:text-red-500 hover:scale-110 transition disabled:opacity-50"
-              title="Remove from cart"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        )}
+              <span className="text-white text-sm font-medium">{quantity}</span>
+
+              <button
+                onClick={increase}
+                disabled={!canIncrease || controlLoading}
+                className="text-primary disabled:text-gray-500"
+              >
+                <Plus size={18} />
+              </button>
+
+              <button
+                onClick={remove}
+                className="text-red-400 hover:text-red-500 transition"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

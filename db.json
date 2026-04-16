@@ -65,13 +65,24 @@
       },
       "cart": [
         {
-          "id": "54",
-          "name": "Corsair K70 CORE TKL RGB",
-          "brand": "Corsair",
-          "category": "Keyboard",
-          "price": 11999,
-          "description": "Compact mechanical keyboard with PBT keycaps and per-key RGB.",
-          "image": "https://m.media-amazon.com/images/I/71WNjISlrJL._SX679_.jpg",
+          "id": "13",
+          "name": "Kingston Fury Beast 16GB DDR4 3600MHz",
+          "brand": "Kingston",
+          "category": "RAM",
+          "price": 7499,
+          "description": "Affordable DDR4 memory with great reliability for gaming rigs.",
+          "image": "https://m.media-amazon.com/images/I/71nQp70NhYL._SX522_.jpg",
+          "featured": false,
+          "quantity": 2
+        },
+        {
+          "id": "3",
+          "name": "ASUS TUF RTX 3060 OC",
+          "brand": "ASUS",
+          "category": "GPU",
+          "price": 35999,
+          "description": "Reliable mid-tier GPU with 12GB GDDR6 VRAM and dual-fan cooling.",
+          "image": "https://dlcdnwebimgs.asus.com/gain/233558c6-999a-4458-98d8-34eac09cb836/w800/fwebp",
           "featured": false,
           "quantity": 1
         }
@@ -173,18 +184,18 @@
           "featured": true
         },
         {
-          "id": "54",
-          "name": "Corsair K70 CORE TKL RGB",
-          "brand": "Corsair",
-          "category": "Keyboard",
-          "price": 11999,
-          "description": "Compact mechanical keyboard with PBT keycaps and per-key RGB.",
-          "image": "https://m.media-amazon.com/images/I/71WNjISlrJL._SX679_.jpg",
+          "id": "63",
+          "name": "Elgato Stream Deck Mini",
+          "brand": "Elgato",
+          "category": "Accessory",
+          "price": 8999,
+          "description": "Compact 6-button controller for streamers to trigger custom actions.",
+          "image": "https://m.media-amazon.com/images/I/61w+a4IDpsL._SX522_.jpg",
           "featured": false
         }
       ],
       "createdAt": "2025-11-27T04:32:46.576Z",
-      "updatedAt": "2026-04-16T05:39:03.250Z",
+      "updatedAt": "2026-04-16T15:26:14.457Z",
       "isBlocked": false
     },
     {

@@ -98,7 +98,7 @@ const HeroSection = () => {
               </Link>
 
               <Link
-                to="/contac"
+                to="/contact"
                 className="px-7 py-3.5 rounded-xl border border-white/10 text-gray-300 transition-all duration-300 hover:text-white hover:border-primary/40 hover:bg-white/[0.03]"
               >
                 Custom Build
@@ -119,7 +119,7 @@ const HeroSection = () => {
             {/* Slow vertical float */}
             <motion.div
               animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
               <motion.div
                 whileHover={{ scale: 1.02 }}
