@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import api from "../../api/client";
 import { motion } from "framer-motion";
 import type { Product } from "../../types/product";
+import Fuse from "fuse.js";
 
 /* ------------------ Constants ------------------ */
 
@@ -67,6 +68,9 @@ function Products(): JSX.Element {
     ...POPULAR_BRANDS,
   ]);
 
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   /* Infinite scroll */
   const [visibleCount, setVisibleCount] = useState<number>(15);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -114,7 +118,10 @@ function Products(): JSX.Element {
 
   /* ------------------ URL Category Sync ------------------ */
   useEffect(() => {
-    if (urlCategory && CATEGORIES.includes(urlCategory as any)) {
+    if (
+      urlCategory &&
+      CATEGORIES.includes(urlCategory as (typeof CATEGORIES)[number])
+    ) {
       setCategory(urlCategory);
     }
   }, [urlCategory]);
@@ -136,17 +143,60 @@ function Products(): JSX.Element {
   };
 
   /* ------------------ Filtering ------------------ */
-  const filteredProducts = products
-    .filter((p) =>
-      search ? p.name.toLowerCase().includes(search.toLowerCase()) : true,
-    )
+
+  const fuse = new Fuse(products, {
+    keys: ["name", "category", "brand"],
+    threshold: 0.7, // lower = stricter, higher = looser
+    includeScore: true,
+  });
+
+  let resultProducts: Product[] = products;
+
+  if (search.trim()) {
+    const results = fuse.search(search);
+
+    resultProducts = results.map((res) => res.item);
+  }
+
+  const filteredProducts: Product[] = resultProducts
     .filter((p) => (category === "All" ? true : p.category === category))
     .filter((p) => (brand === "All" ? true : p.brand === brand))
+    .filter((p) => {
+      const priceMatch = search.match(/\d+/);
+      if (!priceMatch) return true;
+      return p.price <= Number(priceMatch[0]);
+    })
     .sort((a, b) => {
       if (sortOrder === "low") return a.price - b.price;
       if (sortOrder === "high") return b.price - a.price;
       return 0;
     });
+
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const value = searchInput.toLowerCase();
+
+    const results = products
+      .map((p) => {
+        const text = `${p.name} ${p.category} ${p.brand}`.toLowerCase();
+
+        let score = 0;
+        if (text.includes(value)) score += 2;
+        if (p.category.toLowerCase().includes(value)) score += 1;
+
+        return { product: p, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((item) => item.product);
+
+    setSuggestions(results);
+  }, [searchInput, products]);
 
   /* Reset visible count when filters change */
   useEffect(() => {
@@ -211,22 +261,44 @@ function Products(): JSX.Element {
         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4 flex-wrap justify-between">
           {/* Search */}
           <div className="flex w-full sm:w-auto flex-1">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
+            <div className="flex items-center w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 focus-within:border-primary transition relative">
+              <Search className="text-gray-400 w-5 h-5" />
+
               <input
                 type="text"
-                placeholder="Search products..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                 onKeyDown={handleKeyPress}
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#76b900] transition-colors"
+                placeholder="Search products..."
+                className="flex-1 bg-transparent outline-none px-3 text-white placeholder-gray-500"
               />
+
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 w-full mt-2 bg-black/95 border border-white/10 rounded-xl shadow-lg z-50 overflow-hidden">
+                  {suggestions.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        setSearchInput(item.name);
+                        setSearch(item.name);
+                        setShowSuggestions(false);
+                      }}
+                      className="px-4 py-3 text-sm text-gray-300 hover:bg-white/5 cursor-pointer transition"
+                    >
+                      {item.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {searchInput && (
-                <button
-                  onClick={() => setSearchInput("")}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-red-400 transition-colors"
-                >
-                  <X size={18} />
+                <button onClick={() => setSearchInput("")}>
+                  <X className="text-gray-400 hover:text-red-400" />
                 </button>
               )}
             </div>
