@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 
 import connectDB from "./config/db.js";
 
+import productRoutes from "./routes/productRoutes.js"
+
 dotenv.config();
 
 const app = express();
@@ -12,9 +14,12 @@ const app = express();
 // connect database
 connectDB();
 
+
 // middleware
 // app.use(cors());
 app.use(express.json());
+
+app.use("/api/products", productRoutes);
 
 // routes
 app.get("/test-db", async (req, res) => {
