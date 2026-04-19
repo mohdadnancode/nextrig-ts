@@ -6,7 +6,6 @@ const productSchema = new mongoose.Schema({
     category: String,
 
     price: { type: Number, required: true },
-    discount: { type: Number, default: 0 },
 
     description: String,
 
@@ -24,7 +23,7 @@ const productSchema = new mongoose.Schema({
     featured: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
 
-    sku: { type: String, unique: true },
+    sku: { type: String},
 
     specs: { type: Object }
 

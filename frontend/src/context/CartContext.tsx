@@ -68,12 +68,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     setLoading(true);
 
     try {
-      const existingItem = cart.find((item) => item.id === product.id);
+      const existingItem = cart.find((item) => item._id === product._id);
       let updatedCart: CartItem[];
 
       if (existingItem) {
         updatedCart = cart.map((item) =>
-          item.id === product.id
+          item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         );
@@ -95,7 +95,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   const removeFromCart: CartContextType["removeFromCart"] = async (id) => {
     if (!isAuthenticated) return;
 
-    const updatedCart = cart.filter((item) => item.id !== id);
+    const updatedCart = cart.filter((item) => item._id !== id);
     setCart(updatedCart);
     await syncCartToServer(updatedCart);
     toast("Item removed from cart");
@@ -108,7 +108,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     if (!isAuthenticated || newQuantity < 1) return;
 
     const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item,
+      item._id === id ? { ...item, quantity: newQuantity } : item,
     );
 
     setCart(updatedCart);

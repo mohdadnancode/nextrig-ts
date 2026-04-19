@@ -5,7 +5,6 @@ import { Search, X } from "lucide-react";
 import api from "../../api/client";
 import { motion } from "framer-motion";
 import type { Product } from "../../types/product";
-import Fuse from "fuse.js";
 
 /* ------------------ Constants ------------------ */
 
@@ -58,63 +57,75 @@ function Products(): JSX.Element {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [page, setPage] = useState<number>(1);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+
   const [searchInput, setSearchInput] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [category, setCategory] = useState<string>("All");
   const [brand, setBrand] = useState<string>("All");
   const [sortOrder, setSortOrder] = useState<string>("default");
 
-  const [availableBrands, setAvailableBrands] = useState<string[]>([
-    ...POPULAR_BRANDS,
-  ]);
+  const [availableBrands] = useState<string[]>([...POPULAR_BRANDS]);
 
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   /* Infinite scroll */
-  const [visibleCount, setVisibleCount] = useState<number>(15);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const hasFetched = useRef<boolean>(false);
 
   const queryParams = new URLSearchParams(location.search);
   const urlCategory = queryParams.get("category");
 
   /* ------------------ Fetch Products ------------------ */
   useEffect(() => {
-    const fetchProducts = async (): Promise<void> => {
-      if (hasFetched.current) return;
+    let isMounted = true;
 
+    const fetchProducts = async () => {
       try {
-        const response = await api.get<Product[]>("/products");
+        if (page === 1) setLoading(true);
+        else setLoadingMore(true);
 
-        // Shuffle order
-        const shuffled = [...response.data].sort(() => Math.random() - 0.5);
-        setProducts(shuffled);
+        const res = await api.get("/products", {
+          params: {
+            page,
+            limit: 15,
+            search,
+            category,
+            brand,
+            sort: sortOrder,
+          },
+        });
 
-        // Build brand list
-        const brandsFromProducts = [
-          ...new Set(response.data.map((p) => p.brand)),
-        ].filter(Boolean) as string[];
+        if (!isMounted) return;
 
-        const allBrands = [
-          ...new Set([...POPULAR_BRANDS, ...brandsFromProducts]),
-        ];
+        const newProducts: Product[] = res.data.products;
 
-        setAvailableBrands(allBrands);
-        hasFetched.current = true;
+        setProducts((prev) =>
+          page === 1 ? newProducts : [...prev, ...newProducts],
+        );
+
+        setHasNextPage(res.data.pagination.hasNextPage);
       } catch (err) {
-        console.error("Error fetching products:", err);
+        console.error("Fetch error:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     };
 
     fetchProducts();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, search, category, brand, sortOrder]);
 
   /* ------------------ URL Category Sync ------------------ */
   useEffect(() => {
@@ -138,39 +149,12 @@ function Products(): JSX.Element {
     setCategory("All");
     setBrand("All");
     setSortOrder("default");
-    setVisibleCount(15);
+    setPage(1);
+    setProducts([]);
     navigate("/products", { replace: true });
   };
 
   /* ------------------ Filtering ------------------ */
-
-  const fuse = new Fuse(products, {
-    keys: ["name", "category", "brand"],
-    threshold: 0.7, // lower = stricter, higher = looser
-    includeScore: true,
-  });
-
-  let resultProducts: Product[] = products;
-
-  if (search.trim()) {
-    const results = fuse.search(search);
-
-    resultProducts = results.map((res) => res.item);
-  }
-
-  const filteredProducts: Product[] = resultProducts
-    .filter((p) => (category === "All" ? true : p.category === category))
-    .filter((p) => (brand === "All" ? true : p.brand === brand))
-    .filter((p) => {
-      const priceMatch = search.match(/\d+/);
-      if (!priceMatch) return true;
-      return p.price <= Number(priceMatch[0]);
-    })
-    .sort((a, b) => {
-      if (sortOrder === "low") return a.price - b.price;
-      if (sortOrder === "high") return b.price - a.price;
-      return 0;
-    });
 
   useEffect(() => {
     if (!searchInput.trim()) {
@@ -198,39 +182,25 @@ function Products(): JSX.Element {
     setSuggestions(results);
   }, [searchInput, products]);
 
-  /* Reset visible count when filters change */
-  useEffect(() => {
-    setVisibleCount(Math.min(15, filteredProducts.length || 15));
-  }, [search, category, brand, sortOrder, filteredProducts.length]);
-
   /* ------------------ Infinite Scroll ------------------ */
+
   useEffect(() => {
     if (!loadMoreRef.current) return;
-    if (filteredProducts.length === 0) return;
+    if (!hasNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries;
-        if (
-          entry.isIntersecting &&
-          !loadingMore &&
-          visibleCount < filteredProducts.length
-        ) {
-          setLoadingMore(true);
-          setTimeout(() => {
-            setVisibleCount((prev) =>
-              Math.min(prev + 15, filteredProducts.length),
-            );
-            setLoadingMore(false);
-          }, 500);
+        if (entries[0].isIntersecting && !loadingMore && hasNextPage) {
+          setPage((prev) => prev + 1);
         }
       },
       { threshold: 0.5 },
     );
 
     observer.observe(loadMoreRef.current);
+
     return () => observer.disconnect();
-  }, [filteredProducts.length, loadingMore, visibleCount]);
+  }, [hasNextPage, loadingMore]);
 
   /* ------------------ Initial Loading ------------------ */
   if (loading) {
@@ -282,7 +252,7 @@ function Products(): JSX.Element {
                 <div className="absolute top-full left-0 w-full mt-2 bg-black/95 border border-white/10 rounded-xl shadow-lg z-50 overflow-hidden">
                   {suggestions.map((item) => (
                     <div
-                      key={item.id}
+                      key={item._id}
                       onClick={() => {
                         setSearchInput(item.name);
                         setSearch(item.name);
@@ -369,12 +339,12 @@ function Products(): JSX.Element {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto">
-        {filteredProducts.length > 0 ? (
+        {products.length > 0 ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {filteredProducts.slice(0, visibleCount).map((product) => (
+              {products.map((product) => (
                 <motion.div
-                  key={product.id}
+                  key={product._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
@@ -385,12 +355,10 @@ function Products(): JSX.Element {
             </div>
 
             {/* Sentinel div for infinite scroll */}
-            {visibleCount < filteredProducts.length && (
-              <div ref={loadMoreRef} className="h-10" />
-            )}
+            {hasNextPage && <div ref={loadMoreRef} className="h-10" />}
 
             {/* Loading more indicator */}
-            {loadingMore && visibleCount < filteredProducts.length && (
+            {loadingMore && (
               <div className="text-center text-primary mt-6 animate-pulse">
                 Loading more products...
               </div>

@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCartControls } from "../../context/useCartControls";
+import brokenImg from "../../assets/broken-img.webp";
+// import brokenImg2 from "../../assets/broken-img2.webp"
 import {
   Heart,
   Share2,
@@ -33,9 +35,9 @@ const ProductDetails = (): JSX.Element => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
-  const cartItem = cart.find((item) => item.id === product?.id);
+  const cartItem = cart.find((item) => item._id === product?._id);
   const quantity = cartItem?.quantity ?? 0;
-  const maxStock = product?.stock ?? 10;
+  const maxStock = product?.countInStock ?? 0;
 
   const {
     increase,
@@ -44,24 +46,30 @@ const ProductDetails = (): JSX.Element => {
     canIncrease,
     canDecrease,
     loading: cartLoading,
-  } = useCartControls(product?.id ?? "", quantity, maxStock);
+  } = useCartControls(product?._id ?? "", quantity, maxStock);
 
-  const isWishlisted = product ? isInWishlist(product.id) : false;
+  const isWishlisted = product ? isInWishlist(product._id) : false;
 
   /* ------------------ Fetch product ------------------ */
   useEffect(() => {
-    const fetchProduct = async (): Promise<void> => {
+    let isMounted = true;
+
+    const fetchProduct = async () => {
       try {
         const res = await api.get<Product>(`/products/${id}`);
-        setProduct(res.data);
+        if (isMounted) setProduct(res.data);
       } catch {
-        setError("Product not found");
+        if (isMounted) setError("Product not found");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     if (id) fetchProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleAddToCart = (): void => {
@@ -114,7 +122,7 @@ const ProductDetails = (): JSX.Element => {
           {/* Image */}
           <div className="flex items-center justify-center bg-gray-900/50 rounded-lg p-4">
             <img
-              src={product.image}
+              src={product.images?.[0] || brokenImg}
               alt={product.name}
               className="max-h-72 object-contain"
             />
@@ -139,7 +147,19 @@ const ProductDetails = (): JSX.Element => {
             </p>
 
             {/* Cart Controls */}
-            {quantity === 0 ? (
+            {product.countInStock === 0 ? (
+              <div className="w-full text-center">
+                <button
+                  disabled
+                  className="w-full bg-gray-700 text-gray-400 font-semibold py-3 rounded-lg cursor-not-allowed"
+                >
+                  Out of Stock
+                </button>
+                <p className="text-red-400 text-sm mt-2">
+                  This product is currently unavailable
+                </p>
+              </div>
+            ) : quantity === 0 ? (
               <button
                 onClick={handleAddToCart}
                 className="w-full bg-[#76b900] hover:bg-[#68a500] text-black font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
@@ -165,9 +185,11 @@ const ProductDetails = (): JSX.Element => {
 
                 <button
                   onClick={increase}
-                  disabled={cartLoading}
+                  disabled={!canIncrease || cartLoading}
                   className={`${
-                    !canIncrease ? "text-gray-500" : "text-primary"
+                    !canIncrease || cartLoading
+                      ? "text-gray-500"
+                      : "text-primary"
                   }`}
                 >
                   <Plus size={20} />
@@ -228,17 +250,16 @@ const ProductDetails = (): JSX.Element => {
                   Specifications
                 </h3>
                 <div className="text-sm text-gray-400 space-y-1">
-                  <p>
-                    <span className="text-gray-300">Category:</span>{" "}
-                    {product.category}
-                  </p>
-                  <p>
-                    <span className="text-gray-300">Brand:</span>{" "}
-                    {product.brand || "Generic"}
-                  </p>
-                  <p>
-                    <span className="text-gray-300">Warranty:</span> 2 Years
-                  </p>
+                  {product.specs && (
+                    <div className="mt-3 space-y-1">
+                      {Object.entries(product.specs).map(([key, value]) => (
+                        <p key={key}>
+                          <span className="text-gray-300">{key}:</span>{" "}
+                          {String(value)}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
