@@ -1,28 +1,26 @@
+import type { Address } from "./address";
+import type { CartItem } from "./cart";
 import type { Order } from "./order";
 import type { Product } from "./product";
 
-export type Address = {
-  fullName: string;
-  address: string;
-  city: string;
-  pincode: string;
-  mobileNumber: string;
-};
-
 export type User = {
-  id: string;
+  _id: string;
   username: string;
   email: string;
-  password: string;
   role: "user" | "admin";
-  profileImage: string;
 
-  address: Address | null;
-  cart: Product[];
+  profileImage?: {
+    url: string;
+    public_id: string;
+  };
+
+  addresses: Address[];
+  cart: CartItem[];
   orders: Order[];
   wishlist: Product[];
 
+  isVerified: boolean;
+  isBlocked: boolean;
   createdAt: string;
   updatedAt: string;
-  isBlocked: boolean;
 };

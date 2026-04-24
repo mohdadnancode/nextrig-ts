@@ -1,21 +1,18 @@
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import { useWishlist } from "../context/WishlistContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/Cart/useCart";
+import { useWishlist } from "../context/Wishlist/useWishlist";
+import { useAuth } from "../context/Auth/useAuth";
 import { useCartControls } from "../context/useCartControls";
 import { Heart, ShoppingCart, Plus, Minus, Trash2, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import type { Product } from "../types/product";
 import type { MouseEvent } from "react";
-
-/* ------------------ Props ------------------ */
+import brokenImg from "../assets/broken-img.webp";
 
 type ProductCardProps = {
   product: Product;
 };
-
-/* ------------------ Component ------------------ */
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
@@ -23,9 +20,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { toggleWishlist, isInWishlist, loading } = useWishlist();
   const { user } = useAuth();
 
-  const cartItem = cart.find((item) => item.id === product.id);
+  const cartItem = cart.find((item) => item._id === product._id);
   const quantity: number = cartItem?.quantity ?? 0;
-  const maxStock: number = product.stock ?? 10;
+
+  const maxStock: number = product.countInStock ?? 10;
 
   const {
     increase,
@@ -34,10 +32,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
     canDecrease,
     canIncrease,
     loading: controlLoading,
-  } = useCartControls(product.id, quantity, maxStock);
+  } = useCartControls(product._id, quantity, maxStock);
 
   const handleProductClick = (): void => {
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${product._id}`);
   };
 
   const handleAddToCart = (e: MouseEvent<HTMLButtonElement>): void => {
@@ -58,7 +56,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     toggleWishlist(product);
   };
 
-  const wishlisted: boolean = isInWishlist(product.id);
+  const wishlisted: boolean = isInWishlist(product._id);
 
   return (
     <motion.div
@@ -72,7 +70,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Image */}
       <div className="relative h-[160px] bg-black/40 flex items-center justify-center p-4">
         <img
-          src={product.image}
+          src={product.images?.[0] || brokenImg}
           alt={product.name}
           className="h-28 object-contain transition-transform duration-300 group-hover:scale-105"
         />
@@ -96,7 +94,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Content */}
       <div className="p-3 flex flex-col flex-1">
-        {/* Category / Brand */}
         <div className="flex items-center gap-2 mb-1">
           <Zap size={12} className="text-primary/60" />
           <span className="text-[10px] uppercase tracking-wide text-gray-500">
@@ -104,18 +101,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Title */}
         <h3 className="text-sm font-medium text-gray-200 leading-snug line-clamp-2 group-hover:text-white transition">
           {product.name}
         </h3>
 
-        {/* Price */}
         <div className="mt-auto pt-3">
           <p className="text-lg font-semibold text-primary">
             ₹{product.price.toLocaleString("en-IN")}
           </p>
 
-          {/* Actions */}
           {quantity === 0 ? (
             <button
               onClick={handleAddToCart}

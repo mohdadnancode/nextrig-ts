@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/Auth/useAuth";
 import {
   Clock,
   Truck,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import api from "../../api/client";
 import type { Order, OrderStatus } from "../../types/order";
+import toast from "react-hot-toast";
 
 const MyOrders: React.FC = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -26,15 +27,16 @@ const MyOrders: React.FC = () => {
   type StatusFilter = OrderStatus | "all";
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
+
   /* ---------------- Fetch Orders ---------------- */
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!isAuthenticated || !user?.id) return;
+      if (!isAuthenticated || !user?._id) return;
 
       setLoading(true);
       try {
-        const res = await api.get(`/users/${user.id}`);
-        const userOrders: Order[] = res.data?.orders || [];
+        const res = await api.get("/orders/my");
+        const userOrders: Order[] = res.data || [];
 
         setOrders(userOrders);
         setFilteredOrders(userOrders);
@@ -46,7 +48,8 @@ const MyOrders: React.FC = () => {
     };
 
     fetchOrders();
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?._id]);
+
 
   /* ---------------- Filter + Sort ---------------- */
   useEffect(() => {
@@ -57,8 +60,8 @@ const MyOrders: React.FC = () => {
     }
 
     result.sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
       return sortBy === "newest" ? dateB - dateA : dateA - dateB;
     });
 
@@ -70,28 +73,22 @@ const MyOrders: React.FC = () => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
   };
 
-  const cancelOrder = async (userId: string, orderId: string) => {
-    try {
-      const res = await api.get(`/users/${userId}`);
-      const userData = res.data;
+  /* ---------------- Cancel Order ---------------- */
 
-      const updatedOrders: Order[] = userData.orders.map((order: Order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: "cancelled",
-              cancelledBy: "user",
-              cancelledAt: new Date().toISOString(),
-            }
-          : order,
+  const cancelOrder = async (orderId: string) => {
+    try {
+      await api.patch(`/orders/${orderId}/cancel`);
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status: "cancelled" } : order,
+        ),
       );
 
-      await api.patch(`/users/${userId}`, { orders: updatedOrders });
-      setOrders(updatedOrders);
-      alert("Order cancelled successfully!");
+      toast.success("Order cancelled successfully!");
     } catch (err) {
       console.error("Failed to cancel order:", err);
-      alert("Something went wrong while cancelling the order.");
+      toast.error("Failed to cancel order");
     }
   };
 
@@ -128,7 +125,7 @@ const MyOrders: React.FC = () => {
   const getStatusCount = (status: OrderStatus) =>
     orders.filter((o) => o.status === status).length;
 
-  /* ---------------- Loading / Auth ---------------- */
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
@@ -156,7 +153,6 @@ const MyOrders: React.FC = () => {
     );
   }
 
-  /* ---------------- JSX (UNCHANGED) ---------------- */
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-100 py-8 px-4 pt-24">
       <div className="max-w-6xl mx-auto">
@@ -275,7 +271,7 @@ const MyOrders: React.FC = () => {
         ) : (
           filteredOrders.map((order) => (
             <div
-              key={order.id}
+              key={order._id}
               className={`bg-white/10 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden transition-all duration-300 hover:border-[#76b900]/30 ${
                 order.status === "cancelled" ? "opacity-60" : ""
               }`}
@@ -284,12 +280,12 @@ const MyOrders: React.FC = () => {
               <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Order ID</p>
-                  <p className="font-semibold text-white">#{order.id}</p>
+                  <p className="font-semibold text-white">#{order._id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Date</p>
                   <p className="font-medium text-white">
-                    {new Date(order.date).toLocaleDateString("en-IN", {
+                    {new Date(order.createdAt).toLocaleDateString("en-IN", {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
@@ -313,10 +309,10 @@ const MyOrders: React.FC = () => {
                 </div>
                 <div className="flex justify-end">
                   <button
-                    onClick={() => toggleOrderDetails(order.id)}
+                    onClick={() => toggleOrderDetails(order._id)}
                     className="bg-[#76b900] hover:bg-[#68a500] text-black font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_0_10px_#76b900] hover:scale-105 flex items-center gap-2"
                   >
-                    {expandedOrder === order.id
+                    {expandedOrder === order._id
                       ? "Hide Details"
                       : "View Details"}
                   </button>
@@ -324,7 +320,7 @@ const MyOrders: React.FC = () => {
               </div>
 
               {/* Expanded Details */}
-              {expandedOrder === order.id && (
+              {expandedOrder === order._id && (
                 <div className="border-t border-white/10 bg-black/20 p-6 animate-fadeIn">
                   {/* Progress Bar */}
                   <div className="mb-6">
@@ -446,14 +442,14 @@ const MyOrders: React.FC = () => {
 
                   {/* Cancel Order Button */}
                   <div className="mt-4 flex justify-end">
-                    {order.status?.toLowerCase() === "pending" ? (
+                    {order.status === "pending" ? (
                       <button
-                        onClick={() => cancelOrder(user.id, order.id)}
+                        onClick={() => cancelOrder(order._id)}
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_0_10px_#ff4444]"
                       >
                         Cancel Order
                       </button>
-                    ) : order.status?.toLowerCase() === "shipped" ? (
+                    ) : order.status === "shipped" ? (
                       <button
                         disabled
                         className="bg-gray-700 text-gray-400 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
@@ -461,7 +457,7 @@ const MyOrders: React.FC = () => {
                       >
                         Order Shipped
                       </button>
-                    ) : order.status?.toLowerCase() === "delivered" ? (
+                    ) : order.status === "delivered" ? (
                       <button
                         disabled
                         className="bg-gray-700 text-gray-400 font-semibold py-2 px-4 rounded-lg cursor-not-allowed"
@@ -469,7 +465,7 @@ const MyOrders: React.FC = () => {
                       >
                         Delivered
                       </button>
-                    ) : order.status?.toLowerCase() === "cancelled" ? (
+                    ) : order.status === "cancelled" ? (
                       <span className="text-red-400 font-semibold">
                         Order Cancelled
                       </span>

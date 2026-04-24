@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/Auth/useAuth";
 
 /* ------------------ Types ------------------ */
 
@@ -40,14 +40,9 @@ const Login = () => {
       try {
         const result = await login(values.email, values.password);
 
-        if (result.success && result.user) {
+        if (result.success) {
           toast.success("Login successful!");
-
-          if (result.user.role === "admin") {
-            navigate("/admin");
-          } else {
-            navigate("/");
-          }
+          navigate("/");
         } else {
           setLocalError("Invalid email or password.");
         }

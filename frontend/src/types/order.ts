@@ -1,5 +1,7 @@
+export type OrderStatus = "pending" | "shipped" | "delivered" | "cancelled";
+
 export type OrderItem = {
-  id: string;
+  product: string;
   name: string;
   price: number;
   quantity: number;
@@ -15,16 +17,16 @@ export type ShippingAddress = {
   mobileNumber: string;
 };
 
-export type OrderStatus = "pending" | "shipped" | "delivered" | "cancelled";
-
 export type Order = {
-  id: string;
-  date: string;
+  _id: string;
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
-  paymentMethod?: string;
-  shippingAddress?: ShippingAddress;
+  paymentMethod: string;
+  paymentDetails?: Record<string, unknown>;
+  shippingAddress: ShippingAddress;
+  createdAt: string;
+  updatedAt: string;
   cancelledBy?: "user" | "admin";
   cancelledAt?: string;
 };

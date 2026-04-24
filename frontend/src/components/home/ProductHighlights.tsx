@@ -5,14 +5,13 @@ import api from "../../api/client";
 /* ------------------ Types ------------------ */
 
 type Product = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
-  image: string;
+  images: string[];
   category: string;
   featured?: boolean;
 };
-
 /* ------------------ Component ------------------ */
 
 const ProductHighlights = () => {
@@ -21,15 +20,15 @@ const ProductHighlights = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const fetchFeaturedProducts = async (): Promise<void> => {
+    const fetchFeaturedProducts = async () => {
       try {
         setLoading(true);
 
-        const { data } = await api.get<Product[]>("/products");
+        const { data } = await api.get("/products");
 
-        const featured = data
-          .filter((p) => p.featured === true)
-          .sort(() => Math.random() - 0.5);
+        const products = data.products || [];
+
+        const featured = products.sort(() => Math.random() - 0.5).slice(0, 10);
 
         setFeaturedProducts(featured);
       } catch (error) {
@@ -105,8 +104,18 @@ const ProductHighlights = () => {
             className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll left"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -115,8 +124,18 @@ const ProductHighlights = () => {
             className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
             aria-label="Scroll right"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
 
@@ -128,35 +147,36 @@ const ProductHighlights = () => {
           >
             {featuredProducts.map((product) => (
               <div
-                key={product.id}
-                className="shrink-0 w-56 sm:w-64 snap-start bg-white/5 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden hover:shadow-[0_0_15px_#76b90055] hover:scale-105 transition-all duration-300 group"
+                key={product._id}
+                className="shrink-0 w-44 sm:w-48 snap-start bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:shadow-[0_0_12px_#76b90055] transition-all duration-300 group"
               >
                 {/* Image */}
-                <div className="relative bg-gray-900/50 aspect-4/3 flex items-center justify-center overflow-hidden">
+                <div className="relative bg-black/40 aspect-square flex items-center justify-center p-4">
                   <img
-                    src={product.image}
+                    src={product.images?.[0]}
                     alt={product.name}
-                    className="object-contain w-full h-full transition-transform duration-300 group-hover:scale-110"
+                    className="object-contain max-h-32 transition-transform duration-300 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="absolute top-2 left-2 bg-[#76b900]/20 border border-[#76b900]/30 text-primary text-[10px] font-semibold px-2 py-0.5 rounded">
+
+                  <span className="absolute top-2 left-2 bg-[#76b900]/20 border border-[#76b900]/30 text-primary text-[10px] px-2 py-0.5 rounded">
                     {product.category}
                   </span>
                 </div>
 
                 {/* Info */}
-                <div className="p-3 flex flex-col justify-between h-30">
-                  <h3 className="text-white font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                <div className="px-3 py-2 space-y-1">
+                  <h3 className="text-white text-xs font-medium line-clamp-2 group-hover:text-primary transition-colors">
                     {product.name}
                   </h3>
 
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-lg font-bold text-primary">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-primary">
                       ₹{product.price.toLocaleString("en-IN")}
                     </span>
+
                     <Link
-                      to={`/products/${product.id}`}
-                      className="px-3 py-1.5 text-xs font-semibold text-black bg-[#76b900] hover:bg-[#68a500] rounded-md transition-all duration-300 hover:shadow-[0_0_10px_rgba(118,185,0,0.4)]"
+                      to={`/products/${product._id}`}
+                      className="text-[10px] px-2 py-1 bg-[#76b900] text-black rounded hover:bg-[#68a500] transition"
                     >
                       View
                     </Link>
@@ -174,8 +194,18 @@ const ProductHighlights = () => {
             className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#76b900] text-primary hover:bg-[#76b900] hover:text-black text-sm font-semibold rounded-lg transition-all duration-300 hover:shadow-[0_0_15px_rgba(118,185,0,0.3)]"
           >
             <span>View All Products</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
             </svg>
           </Link>
         </div>

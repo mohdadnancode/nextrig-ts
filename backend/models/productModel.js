@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     countInStock: {
         type: Number,
         required: true,
-        default: 0
+        default: 0,
     },
 
     rating: { type: Number, default: 0 },
@@ -25,7 +25,7 @@ const productSchema = new mongoose.Schema({
 
     sku: { type: String},
 
-    specs: { type: Object }
+    specs: { type: Object },
 
 }, { timestamps: true });
 

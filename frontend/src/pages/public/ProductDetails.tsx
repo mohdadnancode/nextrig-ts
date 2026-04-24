@@ -1,11 +1,10 @@
 import { useEffect, useState, type JSX } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { useCart } from "../../context/CartContext";
-import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/Auth/useAuth";
+import { useCart } from "../../context/Cart/useCart";
+import { useWishlist } from "../../context/Wishlist/useWishlist";
 import { useCartControls } from "../../context/useCartControls";
 import brokenImg from "../../assets/broken-img.webp";
-// import brokenImg2 from "../../assets/broken-img2.webp"
 import {
   Heart,
   Share2,

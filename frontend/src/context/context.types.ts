@@ -9,18 +9,14 @@ export type AuthContextType = {
   authLoading: boolean;
   authError: string;
   loading: boolean;
-  login: (
-    email: string,
-    password: string,
-  ) => Promise<{
-    success: boolean;
-    user?: User;
-  }>;
+  login: (email: string, password: string) => Promise<{ success: boolean }>;
   register: (userData: {
     username: string;
     email: string;
     password: string;
-  }) => Promise<{ success: boolean }>;
+  }) => Promise<{ success: boolean; email?: string }>;
+  verifyOTP: (email: string, otp: string) => Promise<{ success: boolean }>;
+  resendOTP: (email: string) => Promise<{ success: boolean }>;
   logout: () => void;
   setAuthError: Dispatch<SetStateAction<string>>;
 };

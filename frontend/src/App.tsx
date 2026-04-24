@@ -13,6 +13,7 @@ const ProductDetails = lazy(() => import("./pages/public/ProductDetails"));
 /* -------- Auth -------- */
 const Register = lazy(() => import("./pages/auth/Register"));
 const Login = lazy(() => import("./pages/auth/Login"));
+const VerifyOTP = lazy(() => import("./pages/auth/VerifyOTP"));
 
 /* -------- User -------- */
 const Cart = lazy(() => import("./pages/user/Cart"));
@@ -51,6 +52,7 @@ const App: React.FC = () => {
           {/* Auth */}
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
 
           {/* Protected User Routes */}
           <Route

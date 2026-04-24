@@ -6,9 +6,9 @@ import { Toaster } from "react-hot-toast";
 import App from "./App";
 import "./index.css";
 
-import { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
-import { WishlistProvider } from "./context/WishlistContext";
+import { AuthProvider } from "./context/Auth/AuthProvider";
+import { CartProvider } from "./context/Cart/CartProvider";
+import { WishlistProvider } from "./context/Wishlist/WishlistProvider";
 
 const rootElement = document.getElementById("root");
 
@@ -23,6 +23,7 @@ createRoot(rootElement).render(
         <CartProvider>
           <WishlistProvider>
             <Toaster
+              containerStyle={{ top: 80 }}
               position="top-right"
               toastOptions={{
                 style: {

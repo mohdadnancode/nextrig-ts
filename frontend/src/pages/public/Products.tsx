@@ -3,11 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
 import { Search, X } from "lucide-react";
 import api from "../../api/client";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { Product } from "../../types/product";
 
 /* ------------------ Constants ------------------ */
-
 const CATEGORIES = [
   "All",
   "GPU",
@@ -52,40 +51,39 @@ const POPULAR_BRANDS = [
 ] as const;
 
 /* ------------------ Component ------------------ */
-
 function Products(): JSX.Element {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
-  const [page, setPage] = useState<number>(1);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(true);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const [searchInput, setSearchInput] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
-  const [category, setCategory] = useState<string>("All");
-  const [brand, setBrand] = useState<string>("All");
-  const [sortOrder, setSortOrder] = useState<string>("default");
-
-  const [availableBrands] = useState<string[]>([...POPULAR_BRANDS]);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+  const [brand, setBrand] = useState("All");
+  const [sortOrder, setSortOrder] = useState("default");
 
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
-  /* Infinite scroll */
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
-
   const queryParams = new URLSearchParams(location.search);
   const urlCategory = queryParams.get("category");
 
+  const hasActiveFilters =
+    search || category !== "All" || brand !== "All" || sortOrder !== "default";
+
   /* ------------------ Fetch Products ------------------ */
   useEffect(() => {
-    let isMounted = true;
-
     const fetchProducts = async () => {
+      if(loadingMore) return;
       try {
         if (page === 1) setLoading(true);
         else setLoadingMore(true);
@@ -97,35 +95,40 @@ function Products(): JSX.Element {
             search,
             category,
             brand,
-            sort: sortOrder,
+            sort: sortOrder === "default" ? undefined : sortOrder,
           },
         });
-
-        if (!isMounted) return;
 
         const newProducts: Product[] = res.data.products;
 
         setProducts((prev) =>
-          page === 1 ? newProducts : [...prev, ...newProducts],
+          page === 1
+            ? newProducts
+            : [
+                ...prev,
+                ...newProducts.filter(
+                  (p) => !prev.some((x) => x._id === p._id),
+                ),
+              ],
         );
 
         setHasNextPage(res.data.pagination.hasNextPage);
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error(err);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-          setLoadingMore(false);
-        }
+        setLoading(false);
+        setLoadingMore(false);
       }
     };
 
     fetchProducts();
+  }, [page, search, category, brand, sortOrder, loadingMore]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [page, search, category, brand, sortOrder]);
+  /* ------------------ Reset page on filter change ------------------ */
+  useEffect(() => {
+    setPage(1);
+    setProducts([]);
+  }, [search, category, brand, sortOrder]);
 
   /* ------------------ URL Category Sync ------------------ */
   useEffect(() => {
@@ -133,17 +136,74 @@ function Products(): JSX.Element {
       urlCategory &&
       CATEGORIES.includes(urlCategory as (typeof CATEGORIES)[number])
     ) {
-      setCategory(urlCategory);
+      setCategory(urlCategory as (typeof CATEGORIES)[number]);
     }
   }, [urlCategory]);
 
-  /* ------------------ Search ------------------ */
-  const handleSearch = (): void => setSearch(searchInput.trim());
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+  /* ------------------ Search Suggestions (debounced) ------------------ */
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      setSuggestionsLoading(true);
+      try {
+        const res = await api.get("/products/suggestions", {
+          params: { q: searchInput, limit: 5 },
+        });
+        setSuggestions(res.data);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [searchInput]);
+
+  /* ------------------ Infinite Scroll Observer ------------------ */
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (entry.isIntersecting && hasNextPage && !loadingMore) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      {
+        rootMargin: "300px",
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.unobserve(node);
+    };
+  }, [hasNextPage, loadingMore]);
+
+  /* ------------------ Event Handlers ------------------ */
+  const handleSearch = () => {
+    setSearch(searchInput.trim());
+    setShowSuggestions(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleSearch();
   };
 
-  const clearAllFilters = (): void => {
+  const clearAllFilters = () => {
     setSearchInput("");
     setSearch("");
     setCategory("All");
@@ -154,59 +214,22 @@ function Products(): JSX.Element {
     navigate("/products", { replace: true });
   };
 
-  /* ------------------ Filtering ------------------ */
-
-  useEffect(() => {
-    if (!searchInput.trim()) {
-      setSuggestions([]);
-      return;
-    }
-
-    const value = searchInput.toLowerCase();
-
-    const results = products
-      .map((p) => {
-        const text = `${p.name} ${p.category} ${p.brand}`.toLowerCase();
-
-        let score = 0;
-        if (text.includes(value)) score += 2;
-        if (p.category.toLowerCase().includes(value)) score += 1;
-
-        return { product: p, score };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
-      .map((item) => item.product);
-
-    setSuggestions(results);
-  }, [searchInput, products]);
-
-  /* ------------------ Infinite Scroll ------------------ */
-
-  useEffect(() => {
-    if (!loadMoreRef.current) return;
-    if (!hasNextPage) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loadingMore && hasNextPage) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      { threshold: 0.5 },
-    );
-
-    observer.observe(loadMoreRef.current);
-
-    return () => observer.disconnect();
-  }, [hasNextPage, loadingMore]);
-
-  /* ------------------ Initial Loading ------------------ */
-  if (loading) {
+  /* ------------------ Skeleton Loader ------------------ */
+  if (loading && page === 1) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center text-primary text-xl">
-        Loading products...
+      <div className="min-h-screen bg-[#0d0d0d] px-4 sm:px-8 lg:px-12 py-12 mt-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="h-10 bg-white/5 rounded w-64 mx-auto mb-10 animate-pulse" />
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(15)].map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl h-72 bg-gradient-to-r from-white/5 via-white/10 to-white/5 animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -227,61 +250,91 @@ function Products(): JSX.Element {
           </p>
         </div>
 
-        {/* Search + Filters */}
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4 flex-wrap justify-between">
+        {/* Sticky Filter Bar */}
+        <div className="sticky top-20 z-40 bg-[#0d0d0d]/80 backdrop-blur-md border border-white/10 rounded-xl p-4 sm:p-5 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:gap-4 flex-wrap justify-between shadow-lg">
           {/* Search */}
           <div className="flex w-full sm:w-auto flex-1">
-            <div className="flex items-center w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 focus-within:border-primary transition relative">
-              <Search className="text-gray-400 w-5 h-5" />
-
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                onKeyDown={handleKeyPress}
-                placeholder="Search products..."
-                className="flex-1 bg-transparent outline-none px-3 text-white placeholder-gray-500"
-              />
-
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 w-full mt-2 bg-black/95 border border-white/10 rounded-xl shadow-lg z-50 overflow-hidden">
-                  {suggestions.map((item) => (
-                    <div
-                      key={item._id}
-                      onClick={() => {
-                        setSearchInput(item.name);
-                        setSearch(item.name);
-                        setShowSuggestions(false);
-                      }}
-                      className="px-4 py-3 text-sm text-gray-300 hover:bg-white/5 cursor-pointer transition"
-                    >
-                      {item.name}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {searchInput && (
-                <button onClick={() => setSearchInput("")}>
-                  <X className="text-gray-400 hover:text-red-400" />
-                </button>
-              )}
+            <div className="relative flex items-center w-full">
+              <div className="flex items-center w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 focus-within:border-[#76b900] transition">
+                <Search className="text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => {
+                    setSearchInput(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 200)
+                  }
+                  onKeyDown={handleKeyPress}
+                  placeholder="Search products..."
+                  className="flex-1 bg-transparent outline-none px-3 text-white placeholder-gray-500"
+                />
+                {searchInput && (
+                  <button onClick={() => setSearchInput("")}>
+                    <X className="text-gray-400 hover:text-red-400" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleSearch}
+                className="ml-3 bg-[#76b900] hover:bg-[#68a500] text-black font-semibold px-6 py-3 rounded-lg transition-all duration-300"
+              >
+                Search
+              </button>
             </div>
-            <button
-              onClick={handleSearch}
-              className="ml-3 bg-[#76b900] hover:bg-[#68a500] text-black font-semibold px-6 py-3 rounded-lg transition-all duration-300"
-            >
-              Search
-            </button>
+
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+              {showSuggestions && suggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 w-full mt-2 bg-black/95 border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden"
+                >
+                  {suggestionsLoading ? (
+                    <div className="p-4 text-gray-400 text-sm animate-pulse">
+                      Searching...
+                    </div>
+                  ) : (
+                    suggestions.map((item) => (
+                      <button
+                        key={item._id}
+                        onMouseDown={() => {
+                          setSearchInput(item.name);
+                          setSearch(item.name);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer transition"
+                      >
+                        {item.images?.[0] && (
+                          <img
+                            src={item.images[0]}
+                            alt={item.name}
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {item.category}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+          {/* Filters – stacked on mobile, row on desktop */}
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto">
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -299,7 +352,7 @@ function Products(): JSX.Element {
               onChange={(e) => setBrand(e.target.value)}
               className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-[#76b900] transition-colors"
             >
-              {availableBrands.map((b) => (
+              {POPULAR_BRANDS.map((b) => (
                 <option key={b} value={b} className="text-black bg-white">
                   {b === "All" ? "All Brands" : b}
                 </option>
@@ -322,13 +375,10 @@ function Products(): JSX.Element {
               </option>
             </select>
 
-            {(search ||
-              category !== "All" ||
-              brand !== "All" ||
-              sortOrder !== "default") && (
+            {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
-                className="px-4 py-3 border border-white/10 rounded-lg text-gray-300 hover:text-primary hover:border-[#76b900]/60 transition-all"
+                className="px-4 py-3 border border-white/10 rounded-lg text-gray-300 hover:text-[#76b900] hover:border-[#76b900]/60 transition-all"
               >
                 Clear All
               </button>
@@ -342,25 +392,41 @@ function Products(): JSX.Element {
         {products.length > 0 ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {products.map((product) => (
-                <motion.div
-                  key={product._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                >
-                  <ProductCard product={product} />
-                </motion.div>
-              ))}
+              <AnimatePresence>
+                {products.map((product) => (
+                  <motion.div
+                    key={product._id}
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    layout
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="group"
+                  >
+                    <div className="rounded-xl overflow-hidden transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(118,185,0,0.6)]">
+                      <ProductCard product={product} />
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
 
-            {/* Sentinel div for infinite scroll */}
-            {hasNextPage && <div ref={loadMoreRef} className="h-10" />}
+            {/* Infinite scroll sentinel */}
+            {hasNextPage && (
+              <div
+                ref={loadMoreRef}
+                className="h-40 flex items-center justify-center text-gray-500"
+              >
+                Loading more trigger...
+              </div>
+            )}
 
-            {/* Loading more indicator */}
             {loadingMore && (
-              <div className="text-center text-primary mt-6 animate-pulse">
-                Loading more products...
+              <div className="text-center mt-6 animate-pulse">
+                <div className="inline-flex items-center gap-2 text-[#76b900]">
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Loading more products...
+                </div>
               </div>
             )}
           </>

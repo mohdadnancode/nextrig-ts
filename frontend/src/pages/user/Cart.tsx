@@ -1,170 +1,245 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../context/Cart/useCart";
 import { useCartControls } from "../../context/useCartControls";
-import { Plus, Minus } from "lucide-react";
+import type { CartItem } from "../../types/cart";
+import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Zap } from "lucide-react";
 
-/**
- * Assumptions based on your existing CartContext usage:
- * - cart items already have proper shape (id, name, price, quantity, stock, image)
- * - no runtime changes needed
- */
 
+// ─────────────────────────────────────────────
+// Cart Row — separate component (fixes hooks-in-loop violation)
+// ─────────────────────────────────────────────
+const CartRow = ({ item }: { item: CartItem }) => {
+  const navigate = useNavigate();
+  const { increase, decrease, remove, canDecrease, canIncrease, loading } =
+    useCartControls(item._id, item.quantity, item.countInStock);
+
+  const imageUrl =
+    item.image ||
+    (Array.isArray((item as unknown as { images?: string[] }).images)
+      ? (item as unknown as { images: string[] }).images[0]
+      : "");
+
+  const itemTotal = (item.price ?? 0) * item.quantity;
+
+  return (
+    <div className="grid grid-cols-[auto_1fr_auto] gap-4 items-center p-4 rounded-xl bg-white/[0.03] border border-white/[0.07] hover:border-primary/20 transition-colors">
+
+      {/* Image — clickable → product details */}
+      <div
+        onClick={() => navigate(`/products/${item._id}`)}
+        className="cursor-pointer shrink-0 w-20 h-20 rounded-lg bg-black/40 flex items-center justify-center overflow-hidden border border-white/10 hover:border-primary/30 transition"
+      >
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={item.name}
+            className="w-full h-full object-contain p-1"
+          />
+        ) : (
+          <ShoppingBag size={24} className="text-gray-600" />
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0">
+        {/* Name — clickable → product details */}
+        <h3
+          onClick={() => navigate(`/products/${item._id}`)}
+          className="text-sm font-semibold text-gray-100 truncate cursor-pointer hover:text-primary transition-colors mb-0.5"
+        >
+          {item.name || "Unknown Product"}
+        </h3>
+
+        {item.category && (
+          <div className="flex items-center gap-1 mb-2">
+            <Zap size={10} className="text-primary/60" />
+            <span className="text-[10px] uppercase tracking-wider text-gray-500">
+              {item.category}
+            </span>
+          </div>
+        )}
+
+        <p className="text-primary text-sm font-medium mb-3">
+          ₹{(item.price ?? 0).toLocaleString("en-IN")} each
+        </p>
+
+        {/* Qty controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={decrease}
+            disabled={!canDecrease || loading}
+            className="w-7 h-7 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition"
+          >
+            <Minus size={13} />
+          </button>
+
+          <span className="w-8 text-center text-sm font-semibold tabular-nums">
+            {item.quantity}
+          </span>
+
+          <button
+            onClick={increase}
+            disabled={!canIncrease || loading}
+            className="w-7 h-7 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 hover:border-primary/30 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition"
+          >
+            <Plus size={13} />
+          </button>
+
+          {item.countInStock !== undefined && (
+            <span className="text-[10px] text-gray-600 ml-1">
+              / {item.countInStock} in stock
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Right: total + remove */}
+      <div className="flex flex-col items-end gap-3 shrink-0">
+        <p className="text-base font-bold text-primary tabular-nums">
+          ₹{itemTotal.toLocaleString("en-IN")}
+        </p>
+        <button
+          onClick={remove}
+          disabled={loading}
+          className="w-7 h-7 rounded-md border border-red-500/30 text-red-400/70 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/50 disabled:opacity-40 flex items-center justify-center transition"
+          aria-label="Remove item"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+// ─────────────────────────────────────────────
+// Main Cart Page
+// ─────────────────────────────────────────────
 const Cart: React.FC = () => {
   const navigate = useNavigate();
-
   const { cart, clearCart, cartCount, totalPrice, loading } = useCart();
 
-  /* Loading state */
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center">
-        <div className="text-primary text-xl">Loading cart...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 text-sm">Loading cart...</p>
+        </div>
       </div>
     );
   }
 
-  /* Empty cart */
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] text-gray-100 flex items-center justify-center px-4 pt-20">
+      <div className="min-h-screen bg-[#0d0d0d] text-gray-100 flex items-center justify-center px-4">
         <div className="text-center">
-          <h2 className="text-3xl font-semibold mb-8">
-            Your cart is empty{" "}
-            <i className="fa-solid fa-cart-shopping text-primary"></i>
+          <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+            <ShoppingBag size={32} className="text-gray-600" />
+          </div>
+          <h2 className="text-2xl font-semibold text-white mb-2">
+            Your cart is empty
           </h2>
+          <p className="text-gray-500 text-sm mb-8">
+            Add some gear to get started.
+          </p>
           <Link
             to="/products"
-            className="inline-flex items-center justify-center rounded-lg bg-[#76b900] text-black font-medium px-6 py-3 hover:shadow-[0_0_10px_#76b900] hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary text-black font-semibold px-6 py-3 hover:bg-[#68a500] hover:shadow-[0_0_16px_#76b900] transition"
           >
             Browse Products
+            <ArrowRight size={16} />
           </Link>
         </div>
       </div>
     );
   }
 
+  const shipping = totalPrice >= 5000 ? 0 : 199;
+  const grandTotal = totalPrice + shipping;
+
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-gray-100 py-10 px-4 mt-12">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-semibold mb-8">
-          Shopping Cart ({cartCount})
-        </h1>
+    <div className="min-h-screen bg-[#0d0d0d] text-gray-100 pt-24 pb-16 px-4">
+      <div className="max-w-4xl mx-auto">
 
-        {/* Cart Items */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-lg shadow-black/30 overflow-hidden mb-6">
-          <div className="p-6">
-            {cart.map((item) => {
-              const {
-                increase,
-                decrease,
-                remove,
-                canDecrease,
-                loading: controlLoading,
-              } = useCartControls(item.id, item.quantity, item.stock);
-
-              return (
-                <div
-                  key={item.id}
-                  className="flex flex-col sm:flex-row gap-4 items-start sm:items-center py-6 border-b border-white/10 last:border-b-0"
-                >
-                  {/* Product Image */}
-                  <div className="shrink-0">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/5 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-500 text-sm">No Image</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg sm:text-xl font-semibold mb-2 truncate">
-                      {item.name}
-                    </h3>
-                    <p className="text-primary text-lg font-medium mb-3">
-                      ₹{item.price.toLocaleString("en-IN")} each
-                    </p>
-
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400 text-sm">Quantity:</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={decrease}
-                          disabled={!canDecrease || controlLoading}
-                          className="w-8 h-8 rounded-md border border-white/20 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-white font-semibold transition-colors flex items-center justify-center"
-                          aria-label="Decrease quantity"
-                        >
-                          <Minus size={20} />
-                        </button>
-
-                        <span className="w-10 text-center font-medium">
-                          {item.quantity}
-                        </span>
-
-                        <button
-                          onClick={increase}
-                          disabled={controlLoading}
-                          className="w-8 h-8 rounded-md border border-white/20 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-white font-semibold transition-colors flex items-center justify-center"
-                          aria-label="Increase quantity"
-                        >
-                          <Plus size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Item Total & Remove */}
-                  <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
-                    <p className="text-xl font-semibold text-primary">
-                      ₹{(item.price * item.quantity).toLocaleString("en-IN")}
-                    </p>
-                    <button
-                      onClick={remove}
-                      disabled={controlLoading}
-                      className="px-4 py-2 rounded-lg border border-red-500/60 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors text-sm font-medium"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              Cart
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                ({cartCount} {cartCount === 1 ? "item" : "items"})
+              </span>
+            </h1>
           </div>
+          <button
+            onClick={clearCart}
+            className="text-xs text-gray-500 hover:text-red-400 border border-white/10 hover:border-red-500/30 px-3 py-1.5 rounded-lg transition"
+          >
+            Clear all
+          </button>
         </div>
 
-        {/* Total + Actions */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-lg shadow-black/30 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-gray-400 text-sm uppercase tracking-wider mb-1">
-                Total Amount
-              </p>
-              <p className="text-3xl font-bold text-primary">
-                ₹{totalPrice.toLocaleString("en-IN")}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={clearCart}
-                className="px-6 py-3 rounded-lg border border-white/20 bg-white/5 text-gray-100 font-medium hover:bg-white/10 transition-colors"
-              >
-                Clear Cart
-              </button>
+          {/* Items list */}
+          <div className="flex flex-col gap-3">
+            {cart.map((item) => (
+              <CartRow key={item._id} item={item} />
+            ))}
+          </div>
+
+          {/* Order Summary */}
+          <div className="h-fit sticky top-24">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+              <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+                Order Summary
+              </h2>
+
+              <div className="space-y-3 text-sm mb-4">
+                <div className="flex justify-between text-gray-400">
+                  <span>Subtotal</span>
+                  <span className="text-white tabular-nums">
+                    ₹{totalPrice.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between text-gray-400">
+                  <span>Shipping</span>
+                  <span className={shipping === 0 ? "text-primary" : "text-white tabular-nums"}>
+                    {shipping === 0 ? "Free" : `₹${shipping}`}
+                  </span>
+                </div>
+                {shipping > 0 && (
+                  <p className="text-[10px] text-gray-600">
+                    Free shipping on orders above ₹5,000
+                  </p>
+                )}
+              </div>
+
+              <div className="border-t border-white/10 pt-4 mb-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-400">Total</span>
+                  <span className="text-xl font-bold text-primary tabular-nums">
+                    ₹{grandTotal.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+
               <button
                 onClick={() => navigate("/checkout")}
-                className="px-6 py-3 rounded-lg bg-[#76b900] text-black font-medium hover:shadow-[0_0_10px_#76b900] hover:scale-105 transition-transform"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-[#68a500] text-black font-semibold py-3 rounded-lg hover:shadow-[0_0_16px_#76b900] transition"
               >
                 Checkout
+                <ArrowRight size={16} />
               </button>
+
+              <Link
+                to="/products"
+                className="mt-3 w-full flex items-center justify-center text-xs text-gray-500 hover:text-gray-300 transition"
+              >
+                ← Continue shopping
+              </Link>
             </div>
           </div>
         </div>

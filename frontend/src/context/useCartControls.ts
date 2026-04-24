@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { useCart } from "../context/CartContext";
+import { useCart } from "./Cart/useCart";
 
 /* ------------------ Types ------------------ */
 

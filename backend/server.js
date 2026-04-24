@@ -1,47 +1,53 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
+import { connectRedis } from "./config/redis.js";
 
-import productRoutes from "./routes/productRoutes.js"
-
-dotenv.config();
+import userRoutes from "./routes/userRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js"
 
 const app = express();
 
-// connect database
-connectDB();
+app.use(
+    cors({
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        credentials: true,
+    })
+);
 
-
-// middleware
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
+app.use(cookieParser());
 app.use(express.json());
 
-app.use("/api/products", productRoutes);
-
 // routes
-app.get("/test-db", async (req, res) => {
-    try {
-        const collections = await mongoose.connection.db.listCollections().toArray();
-        res.json({
-            status: "connected",
-            collections
-        });
-    } catch (error) {
-        res.status(500).json({
-            status: "error",
-            error: error.message
-        });
-    }
-});
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server is runnnig on port ${PORT}`);
-});
+const startServer = async () => {
+
+    try {
+        await connectDB();
+        await connectRedis();
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error("Server failed to start", err);
+        process.exit(1);
+    }
+};
+
+startServer();

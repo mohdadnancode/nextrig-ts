@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/Auth/useAuth";
 import toast from "react-hot-toast";
 
 /* ------------------ Types ------------------ */
@@ -46,7 +46,7 @@ const Register = () => {
       confirmPassword: "",
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       setLocalError("");
 
       try {
@@ -55,13 +55,15 @@ const Register = () => {
           email: values.email,
           password: values.password,
         });
+        console.log("message:",result.success)
+        if (result.success && result.email) {
+          toast.success("OTP sent to your email");
 
-        if (result.success) {
-          toast.success("Account created successfully!");
-          resetForm();
-          navigate("/login");
+          navigate("/verify-otp", {
+            state: { email: result.email },
+          });
         } else {
-          setLocalError("Email already registered or invalid data.");
+          setLocalError("Registration failed. Try again.");
         }
       } catch (error) {
         console.error("Registration error:", error);

@@ -25,7 +25,8 @@ import accessory from "../../assets/images/products/accessory.webp";
 /* ------------------ Types ------------------ */
 
 type Product = {
-  category?: string;
+  _id: string;
+  category: string;
 };
 
 type Category = string;
@@ -60,15 +61,21 @@ const CategoriesSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCategories = async (): Promise<void> => {
+    const fetchCategories = async () => {
       try {
         setLoading(true);
 
-        const { data } = await api.get<Product[]>("/products");
+        const { data } = await api.get<{ products: Product[] }>("/products");
 
-        const uniqueCategories: Category[] = [
-          ...new Set(data.map((p) => p.category).filter(Boolean)),
-        ] as Category[];
+        const products = data.products || [];
+
+        const uniqueCategories: string[] = [
+          ...new Set(
+            products
+              .map((p) => p.category)
+              .filter((cat): cat is string => Boolean(cat)),
+          ),
+        ];
 
         const shuffled = uniqueCategories.sort(() => Math.random() - 0.5);
 

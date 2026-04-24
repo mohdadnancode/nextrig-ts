@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { useCart } from "../../context/CartContext";
-import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/Auth/useAuth";
+import { useCart } from "../../context/Cart/useCart";
+import { useWishlist } from "../../context/Wishlist/useWishlist";
 import toast from "react-hot-toast";
 
 /* ------------------ Types ------------------ */
@@ -148,9 +148,9 @@ const Navbar = () => {
                 >
                   <div className="relative">
                     <div className="w-8 h-8 rounded-full bg-gray-600 border-2 border-transparent group-hover:border-[#76b900] transition-colors overflow-hidden flex items-center justify-center">
-                      {user.profileImage ? (
+                      {user.profileImage?.url ? (
                         <img
-                          src={user.profileImage}
+                          src={user.profileImage.url}
                           alt={user.username}
                           className="w-full h-full object-cover"
                         />
@@ -175,7 +175,7 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="absolute right-0 mt-2 w-48 bg-[#0A0A0A] backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] rounded-lg shadow-lg py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-[#0A0A0A] backdrop-blur-xl border border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.8)] rounded-lg py-2 z-50">
                       <Link
                         to="/profile"
                         onClick={() => setShowDropdown(false)}
@@ -252,7 +252,9 @@ const Navbar = () => {
               onClick={() => setMenuOpen(!menuOpen)}
               className="text-gray-400 hover:text-white transition-colors text-2xl"
             >
-              <i className={`fa-solid ${menuOpen ? "fa-xmark" : "fa-bars"}`}></i>
+              <i
+                className={`fa-solid ${menuOpen ? "fa-xmark" : "fa-bars"}`}
+              ></i>
             </button>
           </div>
         </div>

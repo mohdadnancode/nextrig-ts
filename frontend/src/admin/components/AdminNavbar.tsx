@@ -2,7 +2,7 @@ import { Menu, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/Auth/useAuth";
 import ConfirmModal from "../../components/ConfirmModal";
 
 /* ---------------- Types ---------------- */
