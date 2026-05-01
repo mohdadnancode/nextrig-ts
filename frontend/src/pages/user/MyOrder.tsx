@@ -11,8 +11,10 @@ import {
   Lock,
 } from "lucide-react";
 import api from "../../api/client";
+import { getImageUrl } from "../../utils/getImageUrl";
 import type { Order, OrderStatus } from "../../types/order";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const MyOrders: React.FC = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -26,7 +28,6 @@ const MyOrders: React.FC = () => {
 
   type StatusFilter = OrderStatus | "all";
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-
 
   /* ---------------- Fetch Orders ---------------- */
   useEffect(() => {
@@ -50,7 +51,6 @@ const MyOrders: React.FC = () => {
     fetchOrders();
   }, [isAuthenticated, user?._id]);
 
-
   /* ---------------- Filter + Sort ---------------- */
   useEffect(() => {
     let result: Order[] = [...orders];
@@ -71,6 +71,55 @@ const MyOrders: React.FC = () => {
   /* ---------------- Helpers ---------------- */
   const toggleOrderDetails = (orderId: string) => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
+  };
+
+  /* ---------------- Payment retry ---------------- */
+
+  const retryPayment = async (order: Order) => {
+    try {
+      const { data: rzpOrder } = await api.post(
+        "/orders/create-razorpay-order",
+        { orderId: order._id },
+      );
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        order_id: rzpOrder.id,
+
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          await api.post("/orders/verify-payment", {
+            ...response,
+            orderId: order._id,
+          });
+
+          toast.success("Payment successful");
+          window.location.reload();
+        },
+
+        modal: {
+          ondismiss: () => {
+            toast.error("Payment cancelled");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || err.message);
+      } else if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Retry failed");
+      }
+    }
   };
 
   /* ---------------- Cancel Order ---------------- */
@@ -124,7 +173,6 @@ const MyOrders: React.FC = () => {
 
   const getStatusCount = (status: OrderStatus) =>
     orders.filter((o) => o.status === status).length;
-
 
   if (authLoading || loading) {
     return (
@@ -280,7 +328,9 @@ const MyOrders: React.FC = () => {
               <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Order ID</p>
-                  <p className="font-semibold text-white">#{order._id}</p>
+                  <p className="font-semibold text-white">
+                    #{order.orderNumber || order._id.slice(-6).toUpperCase()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Date</p>
@@ -295,7 +345,13 @@ const MyOrders: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Total</p>
                   <p className="font-semibold text-primary">
-                    ₹{order.totalAmount?.toLocaleString("en-IN")}
+                    ₹
+                    {(
+                      order.totalAmount ??
+                      order.itemsTotal +
+                        (order.shippingCharge ?? 0) +
+                        (order.codFee ?? 0)
+                    ).toLocaleString("en-IN")}
                   </p>
                 </div>
                 <div>
@@ -358,7 +414,9 @@ const MyOrders: React.FC = () => {
                           >
                             <div className="flex items-center gap-3">
                               <img
-                                src={item.image || "/placeholder.png"}
+                                src={
+                                  getImageUrl(item.image) || "/placeholder.png"
+                                }
                                 alt={item.name}
                                 className="w-12 h-12 object-contain rounded bg-gray-800 p-1"
                               />
@@ -379,6 +437,33 @@ const MyOrders: React.FC = () => {
                             </p>
                           </div>
                         ))}
+                      </div>
+                      <div className="mt-4 space-y-2 text-sm border-t border-white/10 pt-4">
+                        <div className="flex justify-between text-gray-400">
+                          <span>Items Total</span>
+                          <span>
+                            ₹
+                            {(
+                              order.itemsTotal ?? order.totalAmount
+                            ).toLocaleString("en-IN")}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between text-gray-400">
+                          <span>Shipping</span>
+                          <span>
+                            {order.shippingCharge === 0
+                              ? "Free"
+                              : `₹${order.shippingCharge ?? 0}`}
+                          </span>
+                        </div>
+
+                        {order.codFee > 0 && (
+                          <div className="flex justify-between text-gray-400">
+                            <span>COD Fee</span>
+                            <span>₹{order.codFee ?? 0}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -413,8 +498,23 @@ const MyOrders: React.FC = () => {
                           <h3 className="text-lg font-semibold text-primary mb-2">
                             Payment
                           </h3>
+
                           <p className="text-white capitalize">
-                            {order.paymentMethod || "UPI"}
+                            {order.paymentMethod}
+                          </p>
+
+                          <p
+                            className={`text-sm mt-1 ${
+                              order.isPaid
+                                ? "text-green-400"
+                                : "text-yellow-400"
+                            }`}
+                          >
+                            {order.isPaid
+                              ? "Paid"
+                              : order.paymentMethod === "cod"
+                                ? "Pay on Delivery"
+                                : "Payment Pending"}
                           </p>
                         </div>
                         <div>
@@ -436,13 +536,29 @@ const MyOrders: React.FC = () => {
                   <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
                     <span className="text-xl font-bold">Order Total:</span>
                     <span className="text-primary text-xl font-bold">
-                      ₹{order.totalAmount?.toLocaleString("en-IN")}
+                      ₹
+                      {(
+                        order.totalAmount ??
+                        order.itemsTotal +
+                          (order.shippingCharge ?? 0) +
+                          (order.codFee ?? 0)
+                      ).toLocaleString("en-IN")}
                     </span>
                   </div>
 
+                  {!order.isPaid && order.paymentMethod !== "cod" && (
+                    <button
+                      onClick={() => retryPayment(order)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg mr-3"
+                    >
+                      Retry Payment
+                    </button>
+                  )}
+
                   {/* Cancel Order Button */}
                   <div className="mt-4 flex justify-end">
-                    {order.status === "pending" ? (
+                    {order.status === "pending" &&
+                    (order.paymentMethod === "cod" || order.isPaid) ? (
                       <button
                         onClick={() => cancelOrder(order._id)}
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:shadow-[0_0_10px_#ff4444]"

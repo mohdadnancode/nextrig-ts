@@ -6,6 +6,7 @@ import { useAuth } from "../../context/Auth/useAuth";
 import toast from "react-hot-toast";
 import type { Product } from "../../types/product";
 import { Heart, ShoppingCart, X, ArrowRight, Zap, Trash2 } from "lucide-react";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 const Wishlist: React.FC = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -171,7 +172,7 @@ const Wishlist: React.FC = () => {
                 className="block h-[140px] bg-black/30 rounded-t-xl items-center justify-center p-4 overflow-hidden"
               >
                 <img
-                  src={product.images?.[0] ?? ""}
+                  src={getImageUrl(product.images?.[0]) ?? ""}
                   alt={product.name}
                   className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />

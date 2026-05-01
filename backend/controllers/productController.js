@@ -1,4 +1,20 @@
 import Product from "../models/productModel.js";
+import cloudinary from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
+
+export const getProductMeta = async (req, res) => {
+    try {
+        const categories = await Product.distinct("category");
+        const brands = await Product.distinct("brand");
+
+        res.json({
+            categories: ["All", ...categories],
+            brands: ["All", ...brands],
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 export const getProducts = async (req, res) => {
     try {
@@ -10,7 +26,7 @@ export const getProducts = async (req, res) => {
             maxPrice,
             sort,
             page = 1,
-            limit = 15,
+            limit = 10,
         } = req.query;
 
         const pageNumber = Number(page);
@@ -18,7 +34,7 @@ export const getProducts = async (req, res) => {
         const skip = (pageNumber - 1) * limitNumber;
 
         const hasFilters =
-            search ||
+            (search && search.trim()) ||
             (category && category !== "All") ||
             (brand && brand !== "All") ||
             minPrice ||
@@ -26,12 +42,14 @@ export const getProducts = async (req, res) => {
             (sort && sort !== "default");
 
         if (!hasFilters) {
-            const products = await Product.aggregate([
-                { $match: { isAvailable: true } },
-                { $sample: { size: limitNumber } },
-            ]);
-
             const total = await Product.countDocuments({ isAvailable: true });
+
+            const products = await Product.find({ isAvailable: true })
+                .sort({ createdAt: -1, _id: -1 })
+                .skip(skip)
+                .limit(limitNumber);
+
+            const totalPages = Math.ceil(total / limitNumber);
 
             return res.json({
                 products,
@@ -39,7 +57,8 @@ export const getProducts = async (req, res) => {
                     page: pageNumber,
                     limit: limitNumber,
                     total,
-                    hasNextPage: true,
+                    pages: totalPages,
+                    hasNextPage: pageNumber < totalPages,
                 },
             });
         }
@@ -78,13 +97,16 @@ export const getProducts = async (req, res) => {
             .skip(skip)
             .limit(limitNumber);
 
+        const totalPages = Math.ceil(total / limitNumber);
+
         return res.json({
             products,
             pagination: {
                 page: pageNumber,
                 limit: limitNumber,
                 total,
-                hasNextPage: pageNumber * limitNumber < total,
+                pages: totalPages,
+                hasNextPage: pageNumber < totalPages,
             },
         });
     } catch (err) {
@@ -157,13 +179,16 @@ async function getProductsWithAtlasSearch(req, res) {
         const total = result[0]?.metadata[0]?.total || 0;
         const products = result[0]?.data || [];
 
+        const totalPages = Math.ceil(total / limitNumber);
+
         return res.json({
             products,
             pagination: {
                 page: pageNumber,
                 limit: limitNumber,
                 total,
-                hasNextPage: pageNumber * limitNumber < total,
+                pages: totalPages,
+                hasNextPage: pageNumber < totalPages,
             },
         });
     } catch (err) {
@@ -233,8 +258,86 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
     try {
-        const product = await Product.create(req.body);
+        const existing = await Product.findOne({
+            name: { $regex: `^${req.body.name}$`, $options: "i" },
+        });
+
+        if (existing) {
+            return res.status(400).json({
+                message: "Product with this name already exists",
+            });
+        }
+
+        const uploads = await Promise.all(
+            (req.files || []).map(file => uploadToCloudinary(file.buffer))
+        );
+
+        const images = uploads.map(img => ({
+            url: img.secure_url,
+            public_id: img.public_id,
+        }));
+
+        const product = await Product.create({
+            ...req.body,
+            countInStock: Number(req.body.countInStock),
+            images: images,
+        });
+
         res.status(201).json(product);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+export const addProductImages = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        const uploads = await Promise.all(
+            (req.files || []).map(file => uploadToCloudinary(file.buffer))
+        );
+
+        const newImages = uploads.map(img => ({
+            url: img.secure_url,
+            public_id: img.public_id,
+        }));
+
+        product.images = [...product.images, ...newImages];
+
+        await product.save();
+
+        res.json(product);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+export const deleteProductImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { public_id } = req.body;
+
+        const product = await Product.findById(id);
+
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        // delete from cloudinary
+        await cloudinary.uploader.destroy(public_id);
+
+        // remove from DB
+        product.images = product.images.filter(
+            (img) => img.public_id !== public_id
+        );
+
+        await product.save();
+
+        res.json(product);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -242,16 +345,49 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
     try {
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
+        const duplicate = await Product.findOne({
+            _id: { $ne: req.params.id },
+            name: { $regex: `^${req.body.name}$`, $options: "i" },
+        });
 
-        if (!product) {
+        if (duplicate) {
+            return res.status(400).json({
+                message: "Another product with this name already exists",
+            });
+        }
+
+        const existing = await Product.findById(req.params.id);
+
+        if (!existing) {
             return res.status(404).json({ message: "Product not found" });
         }
-        res.json(product);
+
+        // handle images
+        const uploads = await Promise.all(
+            (req.files || []).map(file => uploadToCloudinary(file.buffer))
+        );
+
+        const newImages = uploads.map(img => ({
+            url: img.secure_url,
+            public_id: img.public_id,
+        }));
+
+        if (newImages.length > 0) {
+            existing.images = [...existing.images, ...newImages];
+        }
+
+        // update fields
+        if (req.body.name !== undefined) existing.name = req.body.name;
+        if (req.body.brand !== undefined) existing.brand = req.body.brand;
+        if (req.body.category !== undefined) existing.category = req.body.category;
+        if (req.body.price !== undefined) existing.price = Number(req.body.price);
+        if (req.body.countInStock !== undefined) existing.countInStock = Number(req.body.countInStock);
+        if (req.body.description !== undefined) existing.description = req.body.description;
+        existing.featured = req.body.featured === "true";
+
+        await existing.save();
+
+        res.json(existing);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -265,6 +401,12 @@ export const deleteProduct = async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
 
+        await Promise.all(
+            (product.images || []).map(img =>
+                cloudinary.uploader.destroy(img.public_id)
+            )
+        );
+        await Product.findByIdAndDelete(req.params.id);
         res.json({ message: "Product deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });

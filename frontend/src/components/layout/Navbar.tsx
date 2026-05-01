@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/Auth/useAuth";
 import { useCart } from "../../context/Cart/useCart";
 import { useWishlist } from "../../context/Wishlist/useWishlist";
+import ConfirmModal from "../ConfirmModal";
 import toast from "react-hot-toast";
 
 /* ------------------ Types ------------------ */
@@ -24,6 +25,7 @@ const Navbar = () => {
 
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -46,13 +48,20 @@ const Navbar = () => {
 
   const isActive = (path: string): boolean => location.pathname === path;
 
-  const handleLogout = (): void => {
-    logout();
-    toast.success("Logged out. See you next time! 👋");
+  const handleLogoutClick = (): void => {
     setShowDropdown(false);
     setMenuOpen(false);
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = (): void => {
+    setShowLogoutModal(false);
+    logout();
+    toast.success("Logged out. See you next time! 👋");
     navigate("/");
   };
+
+  const isAdmin = user?.role === "admin";
 
   if (authLoading) {
     return (
@@ -202,9 +211,18 @@ const Navbar = () => {
                           </span>
                         )}
                       </Link>
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setShowDropdown(false)}
+                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-primary transition-colors"
+                        >
+                          <i className="fas fa-gauge-high w-4"></i> Admin Dashboard
+                        </Link>
+                      )}
                       <div className="border-t border-white/20 my-1"></div>
                       <button
-                        onClick={handleLogout}
+                        onClick={handleLogoutClick}
                         className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 hover:text-red-300 transition-colors"
                       >
                         <i className="fas fa-sign-out-alt w-4"></i> Logout
@@ -346,6 +364,9 @@ const Navbar = () => {
                     { to: "/profile", label: "Profile" },
                     { to: "/orders", label: "My Orders" },
                     { to: "/wishlist", label: `Wishlist (${wishlistCount})` },
+                    ...(isAdmin
+                      ? [{ to: "/admin", label: "Admin Dashboard" }]
+                      : []),
                   ].map((itemLink) => (
                     <motion.div key={itemLink.to} variants={item}>
                       <Link
@@ -360,7 +381,7 @@ const Navbar = () => {
 
                   <motion.div variants={item}>
                     <button
-                      onClick={handleLogout}
+                      onClick={handleLogoutClick}
                       className="text-red-400 hover:text-red-300 transition text-left"
                     >
                       Logout
@@ -382,6 +403,17 @@ const Navbar = () => {
           </motion.div>
         </div>
       </motion.div>
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        open={showLogoutModal}
+        title="Logout"
+        message="Are you sure you want to log out?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogoutModal(false)}
+        danger
+      />
     </>
   );
 };

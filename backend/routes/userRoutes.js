@@ -8,6 +8,7 @@ import {
   getMe,
   refreshToken,
   updateUser,
+  removeProfileImage,
 } from "../controllers/authController.js";
 import {
   addAddress,
@@ -30,11 +31,24 @@ router.post("/login", authLimiter, loginUser);
 router.post("/logout", logoutUser);
 router.get("/me", protect, getMe);
 router.patch("/:id", protect, upload.single("image"), updateUser);
+router.delete("/:id/profile-image", protect, removeProfileImage)
 
 // Addresses
 router.post("/address", protect, addAddress);
 router.put("/address/:id", protect, updateAddress);
 router.delete("/address/:id", protect, deleteAddress);
 router.patch("/address/:id/primary", protect, setPrimaryAddress);
+
+router.get("/check-username/:username", async (req, res) => {
+  const username = req.params.username.toLocaleLowerCase();
+  const reserved = ["admin", "root", "owner", "system"];
+
+  if (reserved.includes(username)) {
+    return res.json({ available: false, reason: "reserved" });
+  }
+
+  const exists = await User.findOne({ username: req.params.username });
+  res.json({ available: !exists });
+});
 
 export default router;

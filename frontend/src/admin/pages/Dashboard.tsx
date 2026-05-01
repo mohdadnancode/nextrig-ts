@@ -1,7 +1,15 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api/client";
-import { Users, Package, ShoppingCart, IndianRupee } from "lucide-react";
-
+import {
+  Users,
+  Package,
+  ShoppingCart,
+  IndianRupee,
+  Clock,
+  Truck,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -14,221 +22,373 @@ import {
   Bar,
 } from "recharts";
 import type { LucideIcon } from "lucide-react";
-import type {
-  AdminOrder,
-  AdminDashboardStats,
-  RevenueChartPoint,
-  OrdersChartPoint,
-} from "../admin.types";
-import type { User } from "../../types/user";
 
-// STAT CARD
+/* ────── Types ────── */
+
+type DashboardData = {
+  users: number;
+  products: number;
+  orders: number;
+  revenue: number;
+  recentOrders: RecentOrder[];
+  revenueChart: { date: string; revenue: number }[];
+  ordersChart: { date: string; orders: number }[];
+  statusCounts: {
+    pending: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+  };
+};
+
+type RecentOrder = {
+  _id: string;
+  totalAmount: number;
+  status: string;
+  paymentMethod: string;
+  isPaid: boolean;
+  createdAt: string;
+  customerName: string;
+  customerEmail: string;
+  itemCount: number;
+};
+
+type RangeType = "overall" | "365D" | "30D" | "7D" | "1D";
+
+const RANGE_LABELS = {
+  "30D": "Last 30 Days",
+  "7D": "Last 7 Days",
+  "1D": "Today",
+  "365D": "Last Year",
+  overall: "All Time",
+};
+
+/* ────── Stat Card ────── */
+
 type StatCardProps = {
   title: string;
   value: string | number;
   icon: LucideIcon;
+  accent?: string;
 };
 
-const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
-  <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-4 flex items-center justify-between">
+const StatCard = ({ title, value, icon: Icon, accent }: StatCardProps) => (
+  <div className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-5 flex items-center justify-between group hover:border-primary/25 transition-colors">
     <div>
-      <p className="text-gray-400 text-sm">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
+      <p className="text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+        {title}
+      </p>
+      <p className="text-2xl font-bold text-white">{value}</p>
     </div>
-    <Icon className="text-primary" />
+    <div
+      className={`w-10 h-10 rounded-lg flex items-center justify-center ${accent ?? "bg-primary/10 text-primary"}`}
+    >
+      <Icon size={20} />
+    </div>
   </div>
 );
-// HELPERS
-const getOrderAmount = (order: AdminOrder): number =>
-  Number(order.totalAmount ?? 0);
 
-const isValidOrder = (order: AdminOrder): boolean =>
-  order.status?.toLowerCase() !== "cancelled";
+/* ────── Status Badge ────── */
 
-const getOrderDateKey = (order: AdminOrder): string => {
-  const d = order.date ?? order.createdAt;
-  return d ? new Date(d).toLocaleDateString() : "Unknown";
+const StatusBadge = ({ status }: { status: string }) => {
+  const config: Record<
+    string,
+    { bg: string; text: string; icon: typeof Clock }
+  > = {
+    pending: { bg: "bg-yellow-500/10", text: "text-yellow-400", icon: Clock },
+    shipped: { bg: "bg-blue-500/10", text: "text-blue-400", icon: Truck },
+    delivered: {
+      bg: "bg-green-500/10",
+      text: "text-green-400",
+      icon: CheckCircle2,
+    },
+    cancelled: { bg: "bg-red-500/10", text: "text-red-400", icon: XCircle },
+  };
+  const c = config[status] ?? config.pending;
+  const Icon = c.icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium capitalize ${c.bg} ${c.text}`}
+    >
+      <Icon size={11} />
+      {status}
+    </span>
+  );
 };
 
+/* ────── Tooltip Styles ────── */
+
+const chartTooltipStyle = {
+  contentStyle: {
+    background: "#111",
+    border: "1px solid rgba(118,185,0,0.2)",
+    borderRadius: "8px",
+    fontSize: "12px",
+    color: "#ccc",
+  },
+};
+
+/* ────── Dashboard Component ────── */
+
 const Dashboard = () => {
-  const [stats, setStats] = useState<AdminDashboardStats>({
-    users: 0,
-    products: 0,
-    orders: 0,
-    revenue: "₹0",
-  });
-
-  const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [recentOrders, setRecentOrders] = useState<AdminOrder[]>([]);
-
-  // LOAD DATA
-  const loadDashboard = async () => {
-    try {
-      const [usersRes, productsRes] = await Promise.all([
-        api.get<User[]>("/users"),
-        api.get("/products"),
-      ]);
-
-      const users = usersRes.data;
-      const products = productsRes.data;
-
-      const allOrders: AdminOrder[] = users.flatMap((u) => u.orders ?? []);
-
-      const validOrders = allOrders.filter(isValidOrder);
-
-      const revenue = validOrders.reduce(
-        (sum, o) => sum + getOrderAmount(o),
-        0,
-      );
-
-      setStats({
-        users: users.length,
-        products: products.length,
-        orders: allOrders.length,
-        revenue: `₹${revenue.toLocaleString("en-IN")}`,
-      });
-
-      setOrders(validOrders);
-
-      setRecentOrders(
-        [...allOrders]
-          .sort(
-            (a, b) =>
-              new Date(b.date || b.createdAt || 0).getTime() -
-              new Date(a.date || a.createdAt || 0).getTime(),
-          )
-          .slice(0, 5),
-      );
-    } catch (err) {
-      console.error("Dashboard error:", err);
-    }
-  };
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [range, setRange] = useState<RangeType>("30D");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  // CHART DATA
-  // Revenue per day (non-cancelled)
-  const revenueChartData = useMemo<RevenueChartPoint[]>(() => {
-    const map: Record<string, number> = {};
+        const res = await api.get<DashboardData>("/admin/dashboard", {
+          params: { range},
+        });
 
-    orders.forEach((o) => {
-      const key = getOrderDateKey(o);
-      map[key] = (map[key] || 0) + getOrderAmount(o);
-    });
+        setData(res.data);
+      } catch (err: unknown) {
+        console.error("Dashboard error:", err);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return Object.entries(map).map(([date, revenue]) => ({
-      date,
-      revenue,
-    }));
-  }, [orders]);
+    load();
+  }, [range]);
 
-  // Orders count per day (non-cancelled)
-  const ordersChartData = useMemo<OrdersChartPoint[]>(() => {
-    const map: Record<string, number> = {};
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 text-xs tracking-widest uppercase">
+            Loading dashboard
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-    orders.forEach((o) => {
-      const key = getOrderDateKey(o);
-      map[key] = (map[key] || 0) + 1;
-    });
-
-    return Object.entries(map).map(([date, orders]) => ({
-      date,
-      orders,
-    }));
-  }, [orders]);
+  if (error || !data) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <p className="text-red-400">{error || "Something went wrong"}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* STATS */}
+      {/* ── Stats ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Users" value={stats.users} icon={Users} />
-        <StatCard title="Products" value={stats.products} icon={Package} />
-        <StatCard title="Orders" value={stats.orders} icon={ShoppingCart} />
-        <StatCard title="Revenue" value={stats.revenue} icon={IndianRupee} />
+        <StatCard title="Users" value={data.users} icon={Users} />
+        <StatCard title="Products" value={data.products} icon={Package} />
+        <StatCard
+          title="Paid Orders"
+          value={data.orders}
+          icon={ShoppingCart}
+          accent="bg-blue-500/10 text-blue-400"
+        />
+        <StatCard
+          title="Revenue"
+          value={`₹${data.revenue.toLocaleString("en-IN")}`}
+          icon={IndianRupee}
+          accent="bg-emerald-500/10 text-emerald-400"
+        />
       </div>
 
-      {/* CHARTS */}
+      {/* ── Status Breakdown ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {(
+          [
+            {
+              label: "Pending",
+              count: data.statusCounts.pending,
+              color: "text-yellow-400",
+              icon: Clock,
+            },
+            {
+              label: "Shipped",
+              count: data.statusCounts.shipped,
+              color: "text-blue-400",
+              icon: Truck,
+            },
+            {
+              label: "Delivered",
+              count: data.statusCounts.delivered,
+              color: "text-green-400",
+              icon: CheckCircle2,
+            },
+            {
+              label: "Cancelled",
+              count: data.statusCounts.cancelled,
+              color: "text-red-400",
+              icon: XCircle,
+            },
+          ] as const
+        ).map(({ label, count, color, icon: Icon }) => (
+          <div
+            key={label}
+            className="bg-[#0b0b0b] border border-white/[0.07] rounded-lg px-4 py-3 flex items-center gap-3"
+          >
+            <Icon size={16} className={color} />
+            <div>
+              <p className="text-lg font-bold text-white">{count}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+                {label}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex gap-2 mb-4">
+        {(["overall", "365D", "30D", "7D", "1D"] as RangeType[]).map((r) => (
+          <button
+            key={r}
+            onClick={() => setRange(r)}
+            className={`px-3 py-1 text-xs rounded ${
+              range === r
+                ? "bg-primary text-black"
+                : "bg-white/10 text-gray-400"
+            }`}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Charts ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Chart */}
-        <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-4">
-          <h2 className="mb-4 font-semibold">Revenue Over Time</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-                <XAxis dataKey="date" stroke="#aaa" />
-                <YAxis stroke="#aaa" />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#76b900"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        {/* Revenue */}
+        <div className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-gray-300 mb-4">
+            Revenue ({RANGE_LABELS[range]})
+          </h2>
+          <div className="w-full h-[300px]">
+            {data.revenueChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={data.revenueChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                  <XAxis dataKey="date" stroke="#555" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    stroke="#555"
+                    tick={{ fontSize: 11 }}
+                    tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    {...chartTooltipStyle}
+                    formatter={(value: unknown) => [
+                      `₹${Number(value).toLocaleString("en-IN")}`,
+                      "Revenue",
+                    ]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#76b900"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "#76b900" }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-600 text-sm">
+                No data for selected range
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Orders Chart */}
-        <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-4">
-          <h2 className="mb-4 font-semibold">Orders Per Day</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ordersChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-                <XAxis dataKey="date" stroke="#aaa" />
-                <YAxis stroke="#aaa" />
-                <Tooltip />
-                <Bar dataKey="orders" fill="#76b900" />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Orders per day */}
+        <div className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-gray-300 mb-4">
+            Paid Orders
+          </h2>
+          <div className="w-full h-[300px]">
+            {data.ordersChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.ordersChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" />
+                  <XAxis dataKey="date" stroke="#555" tick={{ fontSize: 11 }} />
+                  <YAxis
+                    stroke="#555"
+                    tick={{ fontSize: 11 }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    {...chartTooltipStyle}
+                    formatter={(value: unknown) => [Number(value), "Orders"]}
+                  />
+                  <Bar dataKey="orders" fill="#76b900" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-600 text-sm">
+                No order data yet
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* RECENT ORDERS */}
-      <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl">
-        <div className="p-4 border-b border-[#76b900]/20">
-          <h2 className="font-semibold">Recent Orders</h2>
+      {/* ── Recent Orders ── */}
+      <div className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/[0.07]">
+          <h2 className="text-sm font-semibold text-gray-300">Recent Orders</h2>
         </div>
 
-        <div className="divide-y divide-white/5">
-          {recentOrders.length === 0 && (
-            <p className="p-4 text-gray-400">No orders yet</p>
-          )}
-
-          {recentOrders.map((o) => (
-            <div key={o.id} className="p-4 flex justify-between items-center">
-              <div>
-                <p className="font-medium">#{o.id}</p>
-                <p className="text-sm text-gray-400">
-                  {o.date || o.createdAt
-                    ? new Date(o.date ?? o.createdAt).toLocaleDateString(
-                        "en-IN",
-                      )
-                    : "—"}
-                </p>
-              </div>
-
-              <span
-                className={`text-xs px-2 py-1 rounded capitalize ${
-                  o.status === "pending"
-                    ? "bg-yellow-500/20 text-yellow-400"
-                    : o.status === "shipped"
-                      ? "bg-blue-500/20 text-blue-400"
-                      : o.status === "delivered"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-red-500/20 text-red-400"
+        {data.recentOrders.length === 0 ? (
+          <p className="p-5 text-gray-500 text-sm">No orders yet</p>
+        ) : (
+          <div className="divide-y divide-white/[0.04]">
+            {data.recentOrders.map((o) => (
+              <div
+                key={o._id}
+                className={`px-5 py-3.5 flex items-center gap-4 ${
+                  !o.isPaid ? "opacity-60 blur-[0.2px]" : ""
                 }`}
               >
-                {o.status}
-              </span>
-            </div>
-          ))}
-        </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-200 truncate">
+                    {o.customerName}
+                  </p>
+                  <p className="text-[11px] text-gray-500">
+                    {o.itemCount} item{o.itemCount !== 1 ? "s" : ""} ·{" "}
+                    {new Date(o.createdAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-end gap-1">
+                  <StatusBadge status={o.status} />
+
+                  <span
+                    className={`text-[10px] font-medium ${
+                      o.isPaid ? "text-green-400" : "text-yellow-400"
+                    }`}
+                  >
+                    {o.isPaid
+                      ? "Paid"
+                      : o.paymentMethod === "cod"
+                        ? "COD"
+                        : "Pending Payment"}
+                  </span>
+                </div>
+
+                <p className="text-sm font-semibold text-primary tabular-nums w-24 text-right">
+                  ₹{o.totalAmount.toLocaleString("en-IN")}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

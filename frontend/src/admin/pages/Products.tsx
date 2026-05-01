@@ -1,25 +1,32 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/client";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import ConfirmModal from "../../components/ConfirmModal";
 import toast from "react-hot-toast";
 import type { Product } from "../../types/product";
-
-const PER_PAGE = 10;
+import brokenImg from "../../assets/broken-img.webp";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 const Products = () => {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [filtered, setFiltered] = useState<Product[]>([]);
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [brand, setBrand] = useState("all");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [brands, setBrands] = useState<string[]>(["All"]);
+  const [category, setCategory] = useState<string>("All");
+  const [brand, setBrand] = useState<string>("All");
+
   const [priceSort, setPriceSort] = useState("none");
 
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [loading, setLoading] = useState(false);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmType, setConfirmType] = useState<"delete" | "edit" | null>(
@@ -27,71 +34,76 @@ const Products = () => {
   );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // FETCH
-  const fetchProducts = async () => {
-    try {
-      const res = await api.get<Product[]>("/products");
-      setProducts(res.data ?? []);
-    } catch {
-      toast.error("Failed to load products");
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get("/products/meta");
+        setCategories(res.data.categories);
+        setBrands(res.data.brands);
+      } catch {
+        toast.error("Failed to load filters");
+      }
+    };
+
+    fetchMeta();
   }, []);
 
-  //  FILTER
+  // debounce
   useEffect(() => {
-    let data = [...products];
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
 
-    if (search) {
-      data = data.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
+    return () => clearTimeout(t);
+  }, [search]);
 
-    if (category !== "all") {
-      data = data.filter((p) => p.category === category);
-    }
-
-    if (brand !== "all") {
-      data = data.filter((p) => p.brand === brand);
-    }
-
-    if (priceSort === "low") {
-      data.sort((a, b) => Number(a.price) - Number(b.price));
-    }
-
-    if (priceSort === "high") {
-      data.sort((a, b) => Number(b.price) - Number(a.price));
-    }
-
-    setFiltered(data);
-  }, [products, search, category, brand, priceSort]);
-
-  // Reset page when filters change
+  // reset page ONLY when needed
   useEffect(() => {
     setPage(1);
-  }, [search, category, brand, priceSort]);
+  }, [debouncedSearch, category, brand, priceSort]);
 
+  // fetch
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("/products", {
+        params: {
+          page,
+          limit: 10,
+          search: debouncedSearch,
+          category,
+          brand,
+          sort: priceSort === "none" ? "default" : priceSort,
+        },
+      });
+
+      const { products, pagination } = res.data;
+
+      setProducts(products || []);
+      setTotalPages(pagination.pages || 1);
+    } catch {
+      toast.error("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, debouncedSearch, category, brand, priceSort]);
+
+  // main effect
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // clear filters
   const clearFilters = () => {
     setSearch("");
-    setCategory("all");
-    setBrand("all");
+    setCategory("All");
+    setBrand("All");
     setPriceSort("none");
+    setPage(1);
     toast.success("Filters cleared");
   };
 
-  // PAGINATION
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-
-  const paginatedProducts = filtered.slice(
-    (page - 1) * PER_PAGE,
-    page * PER_PAGE,
-  );
-
-  /*  CONFIRM  */
+  // confirm actions
   const openDelete = (p: Product) => {
     setSelectedProduct(p);
     setConfirmType("delete");
@@ -112,15 +124,18 @@ const Products = () => {
 
   const handleConfirm = async () => {
     if (!selectedProduct || !confirmType) return;
+
     try {
       if (confirmType === "delete") {
-        await api.delete(`/products/${selectedProduct.id}`);
-        setProducts((prev) => prev.filter((p) => p.id !== selectedProduct.id));
+        await api.delete(`/products/${selectedProduct._id}`);
         toast.success("Product deleted");
+
+        // always refetch (IMPORTANT)
+        fetchProducts();
       }
 
       if (confirmType === "edit") {
-        navigate(`/admin/products/${selectedProduct.id}/edit`);
+        navigate(`/admin/products/${selectedProduct._id}/edit`);
       }
     } catch {
       toast.error("Action failed");
@@ -129,8 +144,28 @@ const Products = () => {
     }
   };
 
-  const categories = ["all", ...new Set(products.map((p) => p.category))];
-  const brands = ["all", ...new Set(products.map((p) => p.brand))];
+  const getPageNumbers = () => {
+    const result: (number | "...")[] = [];
+
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) result.push(i);
+      return result;
+    }
+
+    result.push(1);
+
+    if (page > 3) result.push("...");
+
+    for (let i = page - 1; i <= page + 1; i++) {
+      if (i > 1 && i < totalPages) result.push(i);
+    }
+
+    if (page < totalPages - 2) result.push("...");
+
+    result.push(totalPages);
+
+    return result;
+  };
 
   return (
     <div className="space-y-6">
@@ -162,7 +197,7 @@ const Products = () => {
         >
           {categories.map((c) => (
             <option key={c} value={c}>
-              {c === "all" ? "All Categories" : c}
+              {c === "All" ? "All Categories" : c}
             </option>
           ))}
         </select>
@@ -174,7 +209,7 @@ const Products = () => {
         >
           {brands.map((b) => (
             <option key={b} value={b}>
-              {b === "all" ? "All Brands" : b}
+              {b === "All" ? "All Brands" : b}
             </option>
           ))}
         </select>
@@ -197,142 +232,168 @@ const Products = () => {
         </button>
       </div>
 
-      {/* Desktop Table */}
-      <div className="hidden md:block bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl overflow-x-auto">
-        <table className="w-full text-sm table-fixed">
-          <thead className="text-gray-400 border-b border-white/10">
-            <tr>
-              <th className="p-3 w-20">Image</th>
-              <th className="p-3 w-70">Name</th>
-              <th className="p-3 w-27.5">Brand</th>
-              <th className="p-3 w-27.5">Category</th>
-              <th className="p-3 w-25 text-right">Price</th>
-              <th className="p-3 w-25 text-center">Featured</th>
-              <th className="p-3 w-25 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedProducts.map((p: Product) => (
-              <tr
-                key={p.id}
-                className="border-b border-white/5  hover:bg-white/5"
+      {/* CONTENT */}
+      {loading ? (
+        <p className="text-center py-10 text-gray-400">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="text-center py-10 text-gray-400">No products found</p>
+      ) : (
+        <>
+          {/* Desktop */}
+          <div className="hidden md:block bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl overflow-x-auto">
+            <table className="w-full text-sm table-fixed">
+              <thead className="text-gray-400 border-b border-white/10">
+                <tr>
+                  <th className="p-3 w-20">Image</th>
+                  <th className="p-3 w-70">Name</th>
+                  <th className="p-3 w-27.5">Brand</th>
+                  <th className="p-3 w-27.5">Category</th>
+                  <th className="p-3 w-25 text-right">Price</th>
+                  <th className="p-3 w-25 text-center">Featured</th>
+                  <th className="p-3 w-25 text-center">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {products.map((p) => (
+                  <tr
+                    key={p._id}
+                    className="border-b border-white/5 hover:bg-white/5"
+                  >
+                    <td className="p-3">
+                      <img
+                        src={getImageUrl(p.images?.[0]) || brokenImg}
+                        alt={p.name}
+                        className="w-12 h-12 rounded object-cover mx-auto"
+                      />
+                    </td>
+
+                    <td className="p-3 truncate">{p.name}</td>
+                    <td className="p-3">{p.brand}</td>
+                    <td className="p-3">{p.category}</td>
+                    <td className="p-3 text-right">₹{p.price}</td>
+
+                    <td className="p-3 text-center">
+                      {p.featured ? "Yes" : "No"}
+                    </td>
+
+                    <td className="p-3">
+                      <div className="flex justify-center gap-3">
+                        <button
+                          onClick={() => openEdit(p)}
+                          className="text-blue-400"
+                        >
+                          <Pencil size={16} />
+                        </button>
+
+                        <button
+                          onClick={() => openDelete(p)}
+                          className="text-red-400"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile */}
+          <div className="md:hidden space-y-4">
+            {products.map((p) => (
+              <div
+                key={p._id}
+                className="bg-[#0b0b0b] border border-white/10 rounded-xl p-4"
               >
-                <td className="p-3 w-20">
+                <div className="flex gap-3">
                   <img
-                    src={p.image}
+                    src={getImageUrl(p.images?.[0]) || brokenImg}
                     alt={p.name}
-                    className="w-12 h-12 rounded object-cover mx-auto"
+                    className="w-16 h-16 rounded object-cover"
                   />
-                </td>
 
-                <td className="p-3 w-70 truncate">{p.name}</td>
-
-                <td className="p-3 w-27.5">{p.brand}</td>
-
-                <td className="p-3 w-27.5">{p.category}</td>
-
-                <td className="p-3 w-25 text-right">₹{p.price}</td>
-
-                <td className="p-3 w-25 text-center">
-                  {p.featured ? "Yes" : "No"}
-                </td>
-
-                <td className="p-3 w-25">
-                  <div className="flex justify-center gap-3">
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="text-blue-400"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => openDelete(p)}
-                      className="text-red-400"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{p.name}</h3>
+                    <p className="text-sm text-gray-400">
+                      {p.brand} • {p.category}
+                    </p>
+                    <p className="text-sm mt-1">₹{p.price}</p>
+                    <p className="text-xs text-gray-500">
+                      Featured: {p.featured ? "Yes" : "No"}
+                    </p>
                   </div>
-                </td>
-              </tr>
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => openEdit(p)}
+                    className="flex-1 border border-blue-500/30 text-blue-400 py-1.5 rounded"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => openDelete(p)}
+                    className="flex-1 border border-red-500/30 text-red-400 py-1.5 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
 
-      {/* Mobile Cards */}
-      <div className="md:hidden space-y-4">
-        {paginatedProducts.map((p: Product) => (
-          <div
-            key={p.id}
-            className="bg-[#0b0b0b] border border-white/10 rounded-xl p-4"
-          >
-            <div className="flex gap-3">
-              <img
-                src={p.image}
-                alt={p.name}
-                className="w-16 h-16 rounded object-cover"
-              />
+          {/* Pagination */}
+          {(
+            <div className="relative mt-6 flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                {/* Prev */}
+                <button
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1.5 rounded border border-white/20 text-sm disabled:opacity-40 hover:border-primary transition"
+                >
+                  Prev
+                </button>
 
-              <div className="flex-1">
-                <h3 className="font-semibold">{p.name}</h3>
-                <p className="text-sm text-gray-400">
-                  {p.brand} • {p.category}
-                </p>
-                <p className="text-sm mt-1">₹{p.price}</p>
-                <p className="text-xs text-gray-500">
-                  Featured: {p.featured ? "Yes" : "No"}
-                </p>
+                {/* Page Numbers */}
+                {getPageNumbers().map((p, i) =>
+                  p === "..." ? (
+                    <span key={`dots-${i}`} className="px-2 text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={`page-${p}-${i}`}
+                      onClick={() => setPage(p)}
+                      className={`px-3 py-1.5 rounded text-sm transition ${
+                        p === page
+                          ? "bg-primary text-black"
+                          : "border border-white/20 hover:border-primary"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ),
+                )}
+
+                {/* Next */}
+                <button
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={page === totalPages}
+                  className="px-3 py-1.5 rounded border border-white/20 text-sm disabled:opacity-40 hover:border-primary transition"
+                >
+                  Next
+                </button>
               </div>
             </div>
-
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => openEdit(p)}
-                className="flex-1 border border-blue-500/30 text-blue-400 py-1.5 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => openDelete(p)}
-                className="flex-1 border border-red-500/30 text-red-400 py-1.5 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {paginatedProducts.length === 0 && (
-          <p className="text-center text-gray-400">No products found</p>
-        )}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4">
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1 border rounded disabled:opacity-40"
-          >
-            Prev
-          </button>
-
-          <span className="text-sm text-gray-400">
-            Page {page} of {totalPages}
-          </span>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1 border rounded disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
+          )}
+        </>
       )}
 
-      {/* Confirm Modal */}
+      {/* Confirm */}
       <ConfirmModal
         open={confirmOpen}
         title="Are you sure?"

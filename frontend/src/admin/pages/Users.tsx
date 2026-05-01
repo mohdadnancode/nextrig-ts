@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../../api/client";
 import ConfirmModal from "../../components/ConfirmModal";
 import toast from "react-hot-toast";
-import type { User } from "../../types/user";
+import type { AdminUser } from "../../types/adminUser";
 
+// Local sub-types
 type StatCardProps = {
   label: string;
-  value: number;
+  value: number | string;
+  accent?: boolean;
 };
 
 type InfoBoxProps = {
@@ -14,39 +16,143 @@ type InfoBoxProps = {
   value: string | number;
 };
 
+type StatusBadgeProps = {
+  isBlocked: boolean;
+};
+
+// Helpers
+const fmt = (n: number) =>
+  n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+
+// Sub-components
+const StatCard = ({ label, value, accent = false }: StatCardProps) => (
+  <div
+    className={`
+      rounded-xl p-4 border transition-all duration-200
+      ${
+        accent
+          ? "bg-gradient-to-br from-[#76b900]/20 to-[#76b900]/5 border-[#76b900]/40 shadow-[0_0_20px_rgba(118,185,0,0.08)]"
+          : "bg-[#0b0b0b] border-white/10 hover:border-white/20"
+      }
+    `}
+  >
+    <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">
+      {label}
+    </p>
+    <p
+      className={`text-2xl font-bold ${accent ? "text-[#76b900]" : "text-white"}`}
+    >
+      {value}
+    </p>
+  </div>
+);
+
+const InfoBox = ({ label, value }: InfoBoxProps) => (
+  <div className="border border-white/10 rounded-lg p-3 bg-white/[0.02]">
+    <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-0.5">
+      {label}
+    </p>
+    <p className="font-semibold text-white text-sm">{value}</p>
+  </div>
+);
+
+const StatusBadge = ({ isBlocked }: StatusBadgeProps) => (
+  <span
+    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+      isBlocked
+        ? "bg-red-500/15 text-red-400 border border-red-500/20"
+        : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+    }`}
+  >
+    <span
+      className={`w-1.5 h-1.5 rounded-full ${isBlocked ? "bg-red-400" : "bg-emerald-400"}`}
+    />
+    {isBlocked ? "Blocked" : "Active"}
+  </span>
+);
+
+const AdminBadge = () => (
+  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/20 uppercase tracking-wider">
+    Admin
+  </span>
+);
+
+const Avatar = ({
+  name,
+  size = "sm",
+}: {
+  name: string;
+  size?: "sm" | "lg";
+}) => {
+  const sizeClass = size === "lg" ? "w-14 h-14 text-xl" : "w-9 h-9 text-sm";
+  return (
+    <div
+      className={`${sizeClass} rounded-full bg-gradient-to-br from-[#76b900]/30 to-[#76b900]/10 border border-[#76b900]/20 text-[#76b900] flex items-center justify-center font-bold shrink-0`}
+    >
+      {name?.charAt(0)?.toUpperCase() ?? "?"}
+    </div>
+  );
+};
+
+// Empty state
+const EmptyState = ({ search }: { search: string }) => (
+  <tr>
+    <td colSpan={6} className="py-16 text-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-2xl">
+          {search ? "🔍" : "👥"}
+        </div>
+        <p className="text-gray-400 font-medium">
+          {search ? `No users match "${search}"` : "No users found"}
+        </p>
+        {search && (
+          <p className="text-gray-600 text-sm">Try a different name or email</p>
+        )}
+      </div>
+    </td>
+  </tr>
+);
+
+// Main component
+
 const Users = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [blockTarget, setBlockTarget] = useState<User | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [blockTarget, setBlockTarget] = useState<AdminUser | null>(null);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH USERS ================= */
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  // Fetch
+  const fetchUsers = useCallback(async () => {
     try {
-      const res = await api.get("/users");
-      setUsers(res.data || []);
-      setFilteredUsers(res.data || []);
+      const res = await api.get<{
+        users: AdminUser[];
+        page: number;
+        pages: number;
+        total: number;
+      }>("/admin/users");
+
+      setUsers(res.data.users);
     } catch {
       toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  /* ================= SEARCH ================= */
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // Filter
   useEffect(() => {
     if (!search.trim()) {
       setFilteredUsers(users);
       return;
     }
-
     const q = search.toLowerCase();
     setFilteredUsers(
       users.filter(
@@ -57,52 +163,42 @@ const Users = () => {
     );
   }, [search, users]);
 
-  /* ================= HELPERS ================= */
-  const isAdminUser = (user: User): boolean => user.role === "admin";
-
-  const getTotalSpent = (user: User): number => {
-    if (!Array.isArray(user.orders)) return 0;
-
-    return user.orders
-      .filter((o) => o.status !== "cancelled")
-      .reduce((sum, order) => {
-        // if (order.total != null) {
-        //   return sum + Number(order.total);
-        // }
-
-        if (order.totalAmount != null) {
-          return sum + Number(order.totalAmount);
-        }
-        if (Array.isArray(order.items)) {
-          const itemsTotal = order.items.reduce(
-            (iSum, item) =>
-              iSum + Number(item.price || 0) * Number(item.quantity || 0),
-            0,
-          );
-
-          return sum + itemsTotal;
-        }
-        return sum;
-      }, 0);
+  // Block toggle
+  const handleToggleBlock = async () => {
+    if (!blockTarget) return;
+    setBlockLoading(true);
+    try {
+      await api.patch(`/admin/users/${blockTarget._id}/block`);
+      toast.success(
+        `User ${blockTarget.isBlocked ? "unblocked" : "blocked"} successfully`,
+      );
+      setBlockTarget(null);
+      fetchUsers();
+    } catch {
+      toast.error("Failed to update user");
+    } finally {
+      setBlockLoading(false);
+    }
   };
 
-  const getRecentOrders = (user: User, limit = 5) => {
-    if (!Array.isArray(user.orders)) return [];
-
-    return [...user.orders]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, limit);
-  };
-
-  /* ================= STATS ================= */
+  // Stats (derived from already-fetched list)
   const totalUsers = users.length;
   const blockedUsers = users.filter((u) => u.isBlocked).length;
-  const usersWithOrders = users.filter(
-    (u) => (u.orders?.length || 0) > 0,
-  ).length;
+  const usersWithOrders = users.filter((u) => u.orderCount > 0).length;
 
+  // Loading skeleton
   if (loading) {
-    return <p className="text-gray-400">Loading users...</p>;
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-48 bg-white/5 rounded" />
+        <div className="grid grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-20 bg-white/5 rounded-xl" />
+          ))}
+        </div>
+        <div className="h-80 bg-white/5 rounded-xl" />
+      </div>
+    );
   }
 
   return (
@@ -110,248 +206,254 @@ const Users = () => {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-gray-400 text-sm">Manage registered users</p>
+          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            Manage registered users
+          </p>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search by name or email"
-          value={search}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearch(e.target.value)
-          }
-          className="bg-black border border-white/20 rounded px-3 py-2 text-white w-full sm:w-64"
-        />
+        <div className="relative w-full sm:w-72">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+            🔍
+          </span>
+          <input
+            type="text"
+            placeholder="Search by name or email…"
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearch(e.target.value)
+            }
+            className="w-full bg-[#0b0b0b] border border-white/10 focus:border-[#76b900]/50 focus:outline-none rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder-gray-600 transition-colors"
+          />
+        </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <StatCard label="Total Users" value={totalUsers} />
         <StatCard label="Blocked" value={blockedUsers} />
-        <StatCard label="With Orders" value={usersWithOrders} />
+        <StatCard label="With Orders" value={usersWithOrders} accent />
       </div>
 
       {/* TABLE */}
-      <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-white/10 text-gray-400">
-            <tr>
-              <th className="p-3 text-left">User</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Orders</th>
-              <th className="p-3 text-left">Total Spent</th>
-              <th className="p-3 text-center">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.map((u) => (
-              <tr key={u.id} className="border-b border-white/5">
-                <td className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#76b900]/20 text-primary flex items-center justify-center font-bold">
-                      {u.username?.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-medium">{u.username}</p>
-                      {u.address?.fullName && (
-                        <p className="text-xs text-gray-400">
-                          {u.address.fullName}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </td>
-
-                <td className="p-3">{u.email}</td>
-
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      u.isBlocked
-                        ? "bg-red-500/20 text-red-400"
-                        : "bg-green-500/20 text-green-400"
+      <div className="bg-[#0b0b0b] border border-white/10 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10">
+                {[
+                  "User",
+                  "Email",
+                  "Status",
+                  "Orders",
+                  "Total Spent",
+                  "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className={`px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider ${
+                      h === "Actions" ? "text-center" : "text-left"
                     }`}
                   >
-                    {u.isBlocked ? "Blocked" : "Active"}
-                  </span>
-                </td>
-
-                <td className="p-3">{u.orders?.length || 0}</td>
-
-                <td className="p-3 text-primary font-semibold">
-                  ₹{getTotalSpent(u).toLocaleString("en-IN")}
-                </td>
-
-                <td className="p-3">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      disabled={isAdminUser(u)}
-                      onClick={() => setBlockTarget(u)}
-                      className={`px-3 py-1 rounded w-20 ${
-                        isAdminUser(u)
-                          ? "bg-gray-500/10 text-gray-500"
-                          : u.isBlocked
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {u.isBlocked ? "Unblock" : "Block"}
-                    </button>
-
-                    <button
-                      onClick={() => setSelectedUser(u)}
-                      className="px-3 py-1 rounded bg-[#76b900]/20 text-primary"
-                    >
-                      View
-                    </button>
-                  </div>
-                </td>
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="divide-y divide-white/5">
+              {filteredUsers.length === 0 ? (
+                <EmptyState search={search} />
+              ) : (
+                filteredUsers.map((u) => (
+                  <tr
+                    key={u._id}
+                    className="hover:bg-white/[0.03] transition-colors duration-150 group"
+                  >
+                    {/* User */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={u.username} />
+                        <div className="min-w-0">
+                          <p className="font-medium text-white truncate">
+                            {u.username}
+                          </p>
+                          {u.role === "admin" && <AdminBadge />}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-4 py-3 text-gray-400 truncate max-w-[200px]">
+                      {u.email}
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-4 py-3">
+                      <StatusBadge isBlocked={u.isBlocked} />
+                    </td>
+
+                    {/* Orders */}
+                    <td className="px-4 py-3 text-gray-300 tabular-nums">
+                      {u.orderCount ?? 0}
+                    </td>
+
+                    {/* Total Spent */}
+                    <td className="px-4 py-3 font-semibold text-[#76b900] tabular-nums">
+                      ₹{fmt(u.totalSpent ?? 0)}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3">
+                      {u.role === "admin" ? (
+                        <div className="flex justify-center">
+                          <AdminBadge />
+                        </div>
+                      ) : (
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => setBlockTarget(u)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium w-20 transition-all duration-150 border ${
+                              u.isBlocked
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20"
+                            }`}
+                          >
+                            {u.isBlocked ? "Unblock" : "Block"}
+                          </button>
+
+                          <button
+                            onClick={() => setSelectedUser(u)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#76b900]/10 text-[#76b900] border border-[#76b900]/20 hover:bg-[#76b900]/20 transition-all duration-150"
+                          >
+                            View
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Row count */}
+        {filteredUsers.length > 0 && (
+          <div className="px-4 py-2 border-t border-white/5 text-xs text-gray-600">
+            Showing {filteredUsers.length} of {users.length} users
+          </div>
+        )}
       </div>
 
       {/* USER DETAILS MODAL */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl w-full max-w-2xl p-6 relative">
-            {/* CLOSE */}
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedUser(null)}
+        >
+          <div
+            className="bg-[#0d0d0d] border border-white/10 rounded-2xl w-full max-w-xl p-6 relative shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
             <button
               onClick={() => setSelectedUser(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors text-sm"
             >
               ✕
             </button>
 
-            {/* HEADER */}
+            {/* Header */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-full bg-[#76b900]/20 text-primary flex items-center justify-center text-xl font-bold">
-                {selectedUser.username?.charAt(0)}
-              </div>
+              <Avatar name={selectedUser.username} size="lg" />
               <div>
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-lg font-bold text-white">
                   {selectedUser.username}
                 </h2>
-                <p className="text-gray-400">{selectedUser.email}</p>
+                <p className="text-gray-500 text-sm">{selectedUser.email}</p>
+                <div className="mt-1">
+                  <StatusBadge isBlocked={selectedUser.isBlocked} />
+                </div>
               </div>
             </div>
 
-            {/* INFO */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <InfoBox
-                label="Status"
-                value={selectedUser.isBlocked ? "Blocked" : "Active"}
-              />
-              <InfoBox
-                label="Orders"
-                value={selectedUser.orders?.length || 0}
-              />
+            {/* Info grid */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <InfoBox label="Role" value={selectedUser.role} />
+              <InfoBox label="Orders" value={selectedUser.orderCount} />
               <InfoBox
                 label="Total Spent"
-                value={`₹${getTotalSpent(selectedUser).toLocaleString(
+                value={`₹${fmt(selectedUser.totalSpent)}`}
+              />
+              <InfoBox
+                label="Member Since"
+                value={new Date(selectedUser.createdAt).toLocaleDateString(
                   "en-IN",
-                )}`}
+                  { day: "2-digit", month: "short", year: "numeric" },
+                )}
               />
             </div>
 
-            {/* ADDRESS */}
-            <div className="mb-6">
-              <h3 className="font-semibold mb-2">Address</h3>
-              {selectedUser.address ? (
-                <div className="border border-white/10 rounded p-3 text-sm text-gray-300">
-                  <p className="font-medium">{selectedUser.address.fullName}</p>
-                  <p>{selectedUser.address.address}</p>
-                  <p>
-                    {selectedUser.address.city} – {selectedUser.address.pincode}
-                  </p>
-                  <p>📞 {selectedUser.address.mobileNumber}</p>
-                </div>
-              ) : (
-                <p className="text-gray-500">No address saved</p>
-              )}
-            </div>
-
-            {/* RECENT ORDERS */}
+            {/* Addresses */}
             <div>
-              <p className="font-semibold mb-2">Recent Orders</p>
-
-              {getRecentOrders(selectedUser).length > 0 ? (
-                <div className="space-y-2">
-                  {getRecentOrders(selectedUser).map((o) => (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Saved Addresses
+              </h3>
+              {selectedUser.addresses?.length > 0 ? (
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {selectedUser.addresses.map((addr, i) => (
                     <div
-                      key={o.id}
-                      className="flex items-center justify-between border border-white/10 rounded px-3 py-2"
+                      key={i}
+                      className="border border-white/10 rounded-lg p-3 text-sm text-gray-300 bg-white/[0.02]"
                     >
-                      <span className="text-sm text-white font-medium">
-                        #{o.id}
-                      </span>
-
-                      <span
-                        className={`text-xs px-2 py-1 rounded capitalize ${
-                          o.status === "pending"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : o.status === "shipped"
-                              ? "bg-blue-500/20 text-blue-400"
-                              : o.status === "delivered"
-                                ? "bg-green-500/20 text-green-400"
-                                : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {o.status}
-                      </span>
+                      <p className="font-medium text-white">{addr.fullName}</p>
+                      <p>{addr.address}</p>
+                      <p>
+                        {addr.city} – {addr.pincode}
+                      </p>
+                      {addr.mobileNumber && (
+                        <p className="text-gray-500 text-xs mt-1">
+                          📞 {addr.mobileNumber}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">No orders yet</p>
+                <p className="text-gray-600 text-sm">No addresses saved</p>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= BLOCK CONFIRM ================= */}
+      {/* BLOCK CONFIRM MODAL */}
       {blockTarget && (
         <ConfirmModal
           open={true}
           title={`${blockTarget.isBlocked ? "Unblock" : "Block"} User`}
-          confirmText={blockTarget.isBlocked ? "Unblock" : "Block"}
+          confirmText={
+            blockLoading
+              ? "Updating…"
+              : blockTarget.isBlocked
+                ? "Unblock"
+                : "Block"
+          }
           cancelText="Cancel"
-          onConfirm={async () => {
-            await api.patch(`/users/${blockTarget.id}`, {
-              isBlocked: !blockTarget.isBlocked,
-            });
-            toast.success("User updated");
-            setBlockTarget(null);
-            fetchUsers();
-          }}
+          onConfirm={handleToggleBlock}
           onCancel={() => setBlockTarget(null)}
           message={`Are you sure you want to ${
             blockTarget.isBlocked ? "unblock" : "block"
-          } ${blockTarget.username}?`}
+          } ${blockTarget.username}? ${
+            blockTarget.isBlocked
+              ? "They will regain access to their account."
+              : "They will be unable to log in."
+          }`}
         />
       )}
     </div>
   );
 };
-
-/* STAT CARD */
-const StatCard = ({ label, value }: StatCardProps) => (
-  <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-4">
-    <p className="text-gray-400 text-sm">{label}</p>
-    <p className="text-2xl font-bold">{value}</p>
-  </div>
-);
-
-const InfoBox = ({ label, value }: InfoBoxProps) => (
-  <div className="border border-white/10 rounded p-3">
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className="font-semibold">{value}</p>
-  </div>
-);
 
 export default Users;

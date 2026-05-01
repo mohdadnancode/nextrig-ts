@@ -4,6 +4,7 @@ import { useCart } from "../../context/Cart/useCart";
 import { useCartControls } from "../../context/useCartControls";
 import type { CartItem } from "../../types/cart";
 import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Zap } from "lucide-react";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 
 // ─────────────────────────────────────────────
@@ -16,9 +17,7 @@ const CartRow = ({ item }: { item: CartItem }) => {
 
   const imageUrl =
     item.image ||
-    (Array.isArray((item as unknown as { images?: string[] }).images)
-      ? (item as unknown as { images: string[] }).images[0]
-      : "");
+    getImageUrl((item as unknown as { images?: (string | { url: string; public_id: string })[] }).images?.[0]);
 
   const itemTotal = (item.price ?? 0) * item.quantity;
 
@@ -87,8 +86,12 @@ const CartRow = ({ item }: { item: CartItem }) => {
           </button>
 
           {item.countInStock !== undefined && (
-            <span className="text-[10px] text-gray-600 ml-1">
-              / {item.countInStock} in stock
+            <span className={`text-[10px] ml-1 ${
+              item.countInStock <= 5 ? "text-amber-400 font-medium" : "text-gray-600"
+            }`}>
+              {item.countInStock <= 5
+                ? `Only ${item.countInStock} left`
+                : `/ ${item.countInStock} in stock`}
             </span>
           )}
         </div>

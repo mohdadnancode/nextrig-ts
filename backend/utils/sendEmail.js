@@ -19,7 +19,7 @@ export const sendOTPEmail = async (email, otp) => {
         <h2>Verify your email</h2>
         <p>Your one-time verification code is:</p>
         <h1 style="letter-spacing:8px;color:#76b900">${otp}</h1>
-        <p style="color:#888">Valid for 5 minutes. Do not share this code.</p>
+        <p style="color:#888">Valid for 2 minutes. Do not share this code.</p>
       </div>
     `,
     });

@@ -28,7 +28,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const res = await api.get("/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    setUser(res.data);
+
+    const userData = res.data;
+
+    if (userData.isBlocked) {
+      accessTokenRef.current = null;
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError("Account is blocked by admin");
+      return;
+    }
+
+    setUser(userData);
   }, []);
 
   /* ------------------ Request interceptor ------------------ */
@@ -124,6 +135,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initAuth();
   }, [fetchUser]);
 
+  /* ------------------ Logout in all tabs ------------------ */
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === "logout") {
+        accessTokenRef.current = null;
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   /* ------------------ Register ------------------ */
 
   const register: AuthContextType["register"] = async (userData) => {
@@ -136,8 +163,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const msg = axios.isAxiosError(error)
         ? (error.response?.data?.message ?? error.message)
         : "Registration failed";
+
       setAuthError(msg);
-      return { success: false };
+
+      return {
+        success: false,
+        message: msg,
+        field: axios.isAxiosError(error)
+          ? error.response?.data?.field
+          : undefined,
+      };
     } finally {
       setAuthLoading(false);
     }
@@ -202,11 +237,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       return { success: true };
     } catch (error: unknown) {
-      const msg = axios.isAxiosError(error)
-        ? (error.response?.data?.message ?? error.message)
-        : "Login failed";
+      const msg =
+        axios.isAxiosError(error) && error.response
+          ? error.response.data?.message || "Login failed"
+          : "Login failed";
       setAuthError(msg);
-      return { success: false };
+      return { success: false, message: msg };
     } finally {
       setAuthLoading(false);
     }
@@ -216,13 +252,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      await api.post("/users/logout"); // clears the httpOnly cookie server-side
-    } catch {
-      // ignore network errors on logout
+      await api.post("/users/logout");
+    } catch (err) {
+      console.error(err);
     }
+
     accessTokenRef.current = null;
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.setItem("logout", Date.now().toString());
   };
 
   /* ------------------ Provider Value ------------------ */

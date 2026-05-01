@@ -19,14 +19,28 @@ export type ShippingAddress = {
 
 export type Order = {
   _id: string;
+
+  orderNumber: string;
+
   items: OrderItem[];
+
+  itemsTotal: number;
+  shippingCharge: number;
+  codFee: number;
+
   totalAmount: number;
+
   status: OrderStatus;
   paymentMethod: string;
   paymentDetails?: Record<string, unknown>;
+
+  isPaid: boolean;
+  paidAt?: string;
+
   shippingAddress: ShippingAddress;
   createdAt: string;
   updatedAt: string;
-  cancelledBy?: "user" | "admin";
+
+  cancelledBy?: "user" | "admin" | "system";
   cancelledAt?: string;
 };

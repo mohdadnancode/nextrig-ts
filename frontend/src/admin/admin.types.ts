@@ -1,4 +1,4 @@
-import type { Order, OrderStatus } from "../types/order";
+import type { OrderStatus } from "../types/order";
 
 export type AdminDashboardStats = {
   users: number;
@@ -17,11 +17,51 @@ export type OrdersChartPoint = {
   orders: number;
 };
 
-export type AdminOrder = Order & {
-  createdAt?: string;
-  userId?: string;
-  customerName?: string;
-  customerEmail?: string;
+/* ── Order types for admin pages ── */
+
+export type AdminOrderItem = {
+  product: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  category?: string;
+};
+
+export type AdminShippingAddress = {
+  fullName: string;
+  address: string;
+  city: string;
+  pincode: string;
+  mobileNumber: string;
+};
+
+export type AdminOrder = {
+  _id: string;
+  orderNumber: string;
+  user?: { _id: string; username: string; email: string };
+
+  items: AdminOrderItem[];
+
+  itemsTotal?: number;
+  shippingCharge?: number;
+  codFee?: number;
+  totalAmount?: number;
+
+  status: OrderStatus;
+  paymentMethod: string;
+  paymentDetails?: Record<string, unknown>;
+
+  isPaid: boolean;
+  paidAt?: string;
+
+  shippingAddress: AdminShippingAddress;
+
+  createdAt: string;
+  updatedAt: string;
+
+  cancelledBy?: "user" | "admin" | "system";
+  cancelledAt?: string;
 };
 
 export type AdminOrderStatus = OrderStatus;

@@ -10,7 +10,7 @@ export type Product = {
 
   description?: string;
 
-  images?: string[];
+  images?: (string | { url: string; public_id: string })[];
 
   countInStock: number;
 

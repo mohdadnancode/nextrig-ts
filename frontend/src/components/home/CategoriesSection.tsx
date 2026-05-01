@@ -22,16 +22,7 @@ import microphone from "../../assets/images/products/microphone.webp";
 import laptop from "../../assets/images/products/laptop.webp";
 import accessory from "../../assets/images/products/accessory.webp";
 
-/* ------------------ Types ------------------ */
-
-type Product = {
-  _id: string;
-  category: string;
-};
-
-type Category = string;
-
-/* ------------------ Category Images ------------------ */
+/* ------------------ Category Images Map ------------------ */
 
 const categoryImages: Record<string, string> = {
   GPU: gpu,
@@ -56,134 +47,92 @@ const categoryImages: Record<string, string> = {
 /* ------------------ Component ------------------ */
 
 const CategoriesSection = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoading(true);
-
-        const { data } = await api.get<{ products: Product[] }>("/products");
-
-        const products = data.products || [];
-
-        const uniqueCategories: string[] = [
-          ...new Set(
-            products
-              .map((p) => p.category)
-              .filter((cat): cat is string => Boolean(cat)),
-          ),
-        ];
-
-        const shuffled = uniqueCategories.sort(() => Math.random() - 0.5);
-
-        setCategories(shuffled.slice(0, 6));
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+        const { data } = await api.get<{ categories: string[] }>(
+          "/products/meta"
+        );
+        const filtered = (data.categories || []).filter(
+          (c) => c !== "All" && c !== "test"
+        );
+        setCategories(filtered.slice(0, 20));
+      } catch (err) {
+        console.error("Error fetching categories:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCategories();
   }, []);
 
-  const handleCategoryClick = (category: Category): void => {
-    navigate(`/products?category=${encodeURIComponent(category)}`);
-  };
-
-  /* ------------------ States ------------------ */
-
   if (loading) {
     return (
-      <div className="bg-[#0d0d0d] text-white py-16 text-center">
-        <p className="text-primary text-lg animate-pulse">
-          Loading categories...
-        </p>
+      <div className="bg-[#0d0d0d] py-12 text-center">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
       </div>
     );
   }
 
-  if (!categories.length) {
-    return (
-      <div className="bg-[#0d0d0d] text-gray-400 py-16 text-center">
-        No categories found
-      </div>
-    );
-  }
-
-  /* ------------------ UI ------------------ */
+  if (!categories.length) return null;
 
   return (
-    <section className="bg-[#0d0d0d] text-white py-20">
+    <section className="bg-[#0d0d0d] text-white py-14">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div className="flex items-end gap-4 mb-8">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-gray-500">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-gray-500 mb-1">
               Shop by Category
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-2 text-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-100">
               Find gear that matches your playstyle
             </h2>
           </div>
-          <span className="hidden sm:block h-px flex-1 sm:ml-8 bg-linear-to-r from-[#76b900] to-transparent" />
+          <span className="hidden sm:block h-px flex-1 bg-gradient-to-r from-[#76b900]/50 to-transparent" />
         </div>
 
         {/* Category Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
-          {categories.map((category, index) => {
-            const image = categoryImages[category] || gpu; // fallback
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-9 gap-3">
+          {categories.map((category, i) => {
+            const image = categoryImages[category] || gpu;
             return (
-              <div
+              <button
                 key={category}
-                onClick={() => handleCategoryClick(category)}
-                className="group flex flex-col items-center text-center cursor-pointer opacity-0 animate-fadeUp hover:scale-110 transition-all duration-300"
+                onClick={() =>
+                  navigate(
+                    `/products?category=${encodeURIComponent(category)}`
+                  )
+                }
+                className="group flex flex-col items-center gap-2 p-2 rounded-xl border border-transparent hover:border-primary/25 hover:bg-white/[0.03] transition-all duration-200 opacity-0 animate-fadeUp"
                 style={{
-                  animationDelay: `${index * 120}ms`,
+                  animationDelay: `${i * 40}ms`,
                   animationFillMode: "forwards",
                 }}
               >
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-[#76b900]/40 bg-white/5 backdrop-blur-md shadow-inner flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-[0_0_15px_#76b90055]">
+                {/* Image circle */}
+                <div className="relative w-14 h-14 rounded-full bg-white/[0.04] border border-white/[0.08] group-hover:border-primary/40 group-hover:shadow-[0_0_12px_rgba(118,185,0,0.15)] overflow-hidden transition-all duration-300">
                   <img
                     src={image}
                     alt={category}
-                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                    className="w-full h-full object-cover scale-105 group-hover:scale-115 transition-transform duration-300"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 rounded-full border border-[#76b900]/40 group-hover:border-[#76b900] transition-all duration-300" />
+                  {/* Subtle green overlay on hover */}
+                  <div className="absolute inset-0 rounded-full bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300" />
                 </div>
-                <p className="mt-3 text-gray-200 font-medium text-sm sm:text-base group-hover:text-primary transition-colors duration-200">
+
+                {/* Label */}
+                <span className="text-[10px] font-medium text-gray-400 group-hover:text-primary leading-tight text-center transition-colors duration-200 line-clamp-1">
                   {category}
-                </p>
-              </div>
+                </span>
+              </button>
             );
           })}
-        </div>
-
-        {/* View All Button */}
-        <div className="text-center mt-10">
-          <button
-            onClick={() => navigate("/products")}
-            className="inline-flex items-center gap-2 px-6 py-2.5 border border-[#76b900] text-primary hover:bg-[#76b900] hover:text-black font-semibold rounded-lg text-sm transition-all duration-300 hover:shadow-[0_0_20px_rgba(118,185,0,0.3)]"
-          >
-            View All Products
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </button>
         </div>
       </div>
     </section>

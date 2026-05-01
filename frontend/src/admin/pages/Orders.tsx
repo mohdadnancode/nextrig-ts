@@ -1,16 +1,15 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import api from "../../api/client";
 import ConfirmModal from "../../components/ConfirmModal";
 import toast from "react-hot-toast";
 import type { AdminOrder, AdminOrderStatus } from "../admin.types";
-import type { User } from "../../types/user";
 
-const statusOptions: AdminOrderStatus[] = [
-  "pending",
-  "shipped",
-  "delivered",
-  "cancelled",
-];
+const statusFlow: Record<AdminOrderStatus, AdminOrderStatus[]> = {
+  pending: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
 
 const statusStyles: Record<AdminOrderStatus, string> = {
   pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
@@ -20,152 +19,158 @@ const statusStyles: Record<AdminOrderStatus, string> = {
 };
 
 const Orders = () => {
+  // State
   const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<AdminOrder[]>([]);
-
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
-  const [nextStatus, setNextStatus] = useState<AdminOrderStatus>("pending");
-
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Status change confirmation
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [nextStatus, setNextStatus] = useState<AdminOrderStatus>("pending");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Filters
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+
+  const [total, setTotal] = useState(0);
+
+  // Fetch Orders from Backend
+  const fetchOrders = useCallback(
+    async (pageNum = 1) => {
+      try {
+        setLoading(true);
+
+        const res = await api.get(`/admin/orders`, {
+          params: {
+            page: pageNum,
+            limit: 5,
+            search: search.replace("#", "").trim(),
+            status: statusFilter,
+            sort: sortBy,
+          },
+        });
+
+        setOrders(res.data.orders);
+        setPage(res.data.page);
+        setPages(res.data.pages);
+        setTotal(res.data.total);
+      } catch {
+        toast.error("Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [search, statusFilter, sortBy],
+  );
+
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(page);
+  }, [page, search, statusFilter, sortBy, fetchOrders]);
 
-  // FETCH ALL USER ORDERS
-  const fetchOrders = async () => {
-    try {
-      const res = await api.get<User[]>("/users");
-      const users = res.data;
-
-      const allOrders: AdminOrder[] = users.flatMap((user) =>
-        (user.orders ?? []).map((order) => ({
-          ...order,
-          userId: user.id,
-          customerName: user.username,
-          customerEmail: user.email,
-          paymentMethod: order.paymentMethod || "UPI",
-        })),
-      );
-
-      allOrders.sort(
-        (a: AdminOrder, b: AdminOrder) =>
-          new Date(b.date || b.createdAt || 0).getTime() -
-          new Date(a.date || a.createdAt || 0).getTime(),
-      );
-      setOrders(allOrders);
-      setFilteredOrders(allOrders);
-    } catch {
-      toast.error("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let result = [...orders];
-
-    // STATUS FILTER
-    if (statusFilter !== "all") {
-      result = result.filter(
-        (o) => o.status?.toLowerCase() === statusFilter.toLowerCase(),
-      );
-    }
-
-    // SEARCH (ORDER ID / EMAIL)
-    if (search.trim()) {
-      const q = search.toLowerCase();
-
-      result = result.filter(
-        (o) =>
-          o.id?.toString().includes(q) ||
-          o.customerEmail?.toLowerCase().includes(q),
-      );
-    }
-
-    // SORT
-    result.sort((a, b) => {
-      const dateA = new Date(a.date || 0);
-      const dateB = new Date(b.date || 0);
-
-      return sortBy === "newest"
-        ? dateB.getTime() - dateA.getTime()
-        : dateA.getTime() - dateB.getTime();
-    });
-
-    setFilteredOrders(result);
-  }, [orders, sortBy, statusFilter, search]);
-
-  // HELPERS
-  const getOrderTotal = (order: AdminOrder): number => {
-    return order.totalAmount;
-  };
-
+  // Helpers
   const toggleDetails = (id: string) => {
     setExpandedOrder(expandedOrder === id ? null : id);
   };
 
-  // STATUS UPDATE
-  const requestStatusChange = (order: AdminOrder, status: string) => {
+  const getStatusCount = (status: AdminOrderStatus) =>
+    orders.filter((o) => o.status === status).length;
+
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+  // Status Update
+  const requestStatusChange = (order: AdminOrder, status: AdminOrderStatus) => {
+    if (status === order.status) return;
     setSelectedOrder(order);
-    setNextStatus(status.toLowerCase() as AdminOrderStatus);
+    setNextStatus(status as AdminOrderStatus);
     setConfirmOpen(true);
   };
-
   const confirmStatusChange = async () => {
     if (!selectedOrder) return;
 
     try {
-      const res = await api.get(`/users/${selectedOrder.userId}`);
-      const user: { id: string; orders: AdminOrder[] } = res.data;
+      await api.patch(`/admin/orders/${selectedOrder._id}/status`, {
+        status: nextStatus,
+      });
+      toast.success(`Order status updated to "${nextStatus}"`);
 
-      const updatedOrders = user.orders.map((o: AdminOrder) =>
-        o.id === selectedOrder.id
-          ? {
-              ...o,
-              status: nextStatus,
-              ...(nextStatus === "cancelled"
-                ? {
-                    cancelledBy: "admin",
-                    cancelledAt: new Date().toISOString(),
-                  }
-                : {}),
-            }
-          : o,
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === selectedOrder._id
+            ? {
+                ...o,
+                status: nextStatus,
+                ...(nextStatus === "cancelled"
+                  ? {
+                      cancelledBy: "admin" as const,
+                      cancelledAt: new Date().toISOString(),
+                    }
+                  : {}),
+              }
+            : o,
+        ),
       );
-      await api.patch(`/users/${user.id}`, { orders: updatedOrders });
-
-      toast.success("Order status updated");
-      fetchOrders();
     } catch {
-      toast.error("Failed to update order");
+      toast.error("Failed to update order status");
     } finally {
       setConfirmOpen(false);
       setSelectedOrder(null);
-      setNextStatus("pending");
     }
   };
 
-  const getStatusCount = (status: AdminOrderStatus) =>
-    orders.filter((o) => o.status?.toLowerCase() === status).length;
+  // Page generator functions
+  const getPageNumbers = () => {
+    const result: (number | "...")[] = [];
 
+    if (pages <= 5) {
+      for (let i = 1; i <= pages; i++) result.push(i);
+      return result;
+    }
+
+    result.push(1);
+
+    if (page > 3) result.push("...");
+
+    for (let i = page - 1; i <= page + 1; i++) {
+      if (i > 1 && i < pages) result.push(i);
+    }
+
+    if (page < pages - 2) result.push("...");
+
+    result.push(pages);
+
+    return result;
+  };
+
+  // Loading State
   if (loading) {
-    return <p className="text-gray-400">Loading orders...</p>;
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
+  // Render
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Orders</h1>
 
+      {/* Status summary bar */}
       <div className="flex flex-wrap gap-4 text-sm text-gray-400">
         <span>
-          Total: <b className="text-white">{orders.length}</b>
+          Total: <b className="text-white">{total}</b>
         </span>
         <span>
           Pending:{" "}
@@ -185,14 +190,31 @@ const Orders = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <input
-          type="text"
-          placeholder="Search by Order ID or Email"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-black border border-white/20 rounded px-3 py-2 text-white w-full sm:w-64 focus:border-[#76b900]"
-        />
+      <div className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <input
+            type="text"
+            value={searchInput}
+            placeholder="Search by ID, name, or email"
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setPage(1);
+              }
+            }}
+            className="bg-black border border-white/20 rounded px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary w-full sm:w-[260px]"
+          />
+
+          <button
+            onClick={() => {
+              setSearch(searchInput);
+              setPage(1);
+            }}
+            className="px-4 py-2 bg-primary text-black rounded hover:opacity-90"
+          >
+            Search
+          </button>
+        </div>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -201,7 +223,6 @@ const Orders = () => {
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
         </select>
-
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -213,21 +234,21 @@ const Orders = () => {
           <option value="delivered">Delivered</option>
           <option value="cancelled">Cancelled</option>
         </select>
-
         <button
           onClick={() => {
             setSearch("");
             setSortBy("newest");
             setStatusFilter("all");
+            setPage(1);
+            fetchOrders(1);
           }}
-          className="border border-white/20 px-4 py-2 rounded text-gray-300 hover:text-primary"
         >
-          Clear Filters
+          Clear
         </button>
       </div>
 
-      {/* ================= DESKTOP ================= */}
-      <div className="hidden md:block bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl overflow-x-auto">
+      {/* DESKTOP TABLE */}
+      <div className="hidden md:block bg-[#0b0b0b] border border-white/[0.07] rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-white/10 text-gray-400">
             <tr>
@@ -242,130 +263,212 @@ const Orders = () => {
           </thead>
 
           <tbody>
-            {filteredOrders.map((o) => (
-              <Fragment key={o.id}>
-                <tr
-                  key={o.id}
-                  className="border-b border-white/5 hover:bg-white/5"
-                >
-                  <td className="p-3 font-medium">#{o.id}</td>
+            {orders.map((o) => {
+              const itemsTotal =
+                o.itemsTotal ??
+                o.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-                  <td className="p-3">
-                    {o.customerName}
-                    <p className="text-xs text-gray-500">{o.customerEmail}</p>
-                  </td>
+              const shipping = o.shippingCharge ?? 0;
+              const cod = o.codFee ?? 0;
 
-                  <td className="p-3 capitalize">{o.paymentMethod}</td>
+              const total = o.totalAmount ?? itemsTotal + shipping + cod;
 
-                  <td className="p-3">
-                    {new Date(o.date).toLocaleDateString("en-IN")}
-                  </td>
+              return (
+                <Fragment key={o._id}>
+                  <tr className="border-b border-white/5 hover:bg-white/[0.03] transition-colors">
+                    {/* Order ID — show last 8 chars for readability */}
+                    <td className="p-3 font-medium font-mono text-xs">
+                      #{o.orderNumber}
+                    </td>
 
-                  <td className="p-3 font-semibold text-primary">
-                    ₹{getOrderTotal(o)?.toLocaleString("en-IN")}
-                  </td>
+                    {/* Customer info — from the populated user object */}
+                    <td className="p-3">
+                      {o.user?.username ?? "Unknown"}
+                      <p className="text-xs text-gray-500">
+                        {o.user?.email ?? ""}
+                      </p>
+                    </td>
 
-                  <td className="p-3">
-                    <div className="flex flex-col gap-1">
-                      <select
-                        value={o.status}
-                        disabled={o.status === "cancelled"}
-                        onChange={(e) => requestStatusChange(o, e.target.value)}
-                        className={`px-2 py-1 rounded border bg-black ${
-                          statusStyles[o.status]
-                        } ${o.status === "cancelled" ? "opacity-60" : ""}`}
-                      >
-                        {statusOptions.map((s) => (
-                          <option
-                            key={s}
-                            value={s}
-                            className="bg-black text-white"
-                          >
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-
-                      {o.status === "cancelled" && (
-                        <span className="text-xs text-red-400">
-                          Cancelled by {o.cancelledBy || "unknown"}
+                    <td className="p-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="capitalize text-gray-300">
+                          {o.paymentMethod}
                         </span>
-                      )}
-                      {o.cancelledAt && (
-                        <span className="text-xs text-gray-500">
-                          {new Date(o.cancelledAt).toLocaleString("en-IN")}
+
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-md w-fit ${
+                            o.isPaid
+                              ? "bg-green-500/10 text-green-400 border border-green-500/30"
+                              : "bg-red-500/10 text-red-400 border border-red-500/30"
+                          }`}
+                        >
+                          {o.isPaid ? "Paid" : "Unpaid"}
                         </span>
-                      )}
-                    </div>
-                  </td>
-
-                  <td className="p-3">
-                    <button
-                      onClick={() => toggleDetails(o.id)}
-                      className="text-primary hover:underline"
-                    >
-                      {expandedOrder === o.id ? "Hide" : "View"}
-                    </button>
-                  </td>
-                </tr>
-
-                {/* DETAILS */}
-                {expandedOrder === o.id && (
-                  <tr className="bg-black/40">
-                    <td colSpan={7} className="p-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Items */}
-                        <div>
-                          <h3 className="font-semibold mb-3">Order Items</h3>
-                          <div className="space-y-2">
-                            {o.items?.map((item, idx) => (
-                              <div
-                                key={idx}
-                                className="flex justify-between border-b border-white/10 pb-2"
-                              >
-                                <span>
-                                  {item.name} × {item.quantity}
-                                </span>
-                                <span>
-                                  ₹
-                                  {(item.price * item.quantity).toLocaleString(
-                                    "en-IN",
-                                  )}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Address */}
-                        <div>
-                          <h3 className="font-semibold mb-3">
-                            Shipping Address
-                          </h3>
-                          {o.shippingAddress ? (
-                            <div className="text-sm text-gray-300 space-y-1">
-                              <p>{o.shippingAddress.fullName}</p>
-                              <p>{o.shippingAddress.address}</p>
-                              <p>
-                                {o.shippingAddress.city} –{" "}
-                                {o.shippingAddress.pincode}
-                              </p>
-                              <p>Mobile: {o.shippingAddress.mobileNumber}</p>
-                            </div>
-                          ) : (
-                            <p className="text-gray-400">No address found</p>
-                          )}
-                        </div>
                       </div>
                     </td>
+
+                    <td className="p-3 text-gray-400">
+                      {formatDate(o.createdAt)}
+                    </td>
+
+                    <td className="p-3 font-semibold text-primary tabular-nums">
+                      <span>₹{total.toLocaleString("en-IN")}</span>
+                    </td>
+
+                    {/* Status dropdown */}
+                    <td className="p-3">
+                      <div className="flex flex-col gap-1">
+                        <select
+                          value={o.status}
+                          disabled={statusFlow[o.status].length === 0}
+                          onChange={(e) =>
+                            requestStatusChange(
+                              o,
+                              e.target.value as AdminOrderStatus,
+                            )
+                          }
+                          className={`px-2 py-1 rounded border text-xs font-medium bg-black transition ${
+                            statusStyles[o.status]
+                          } ${
+                            statusFlow[o.status].length === 0
+                              ? "opacity-60 cursor-not-allowed"
+                              : "cursor-pointer"
+                          }`}
+                        >
+                          {/* current status */}
+                          <option value={o.status}>
+                            {o.status.charAt(0).toUpperCase() +
+                              o.status.slice(1)}
+                          </option>
+
+                          {statusFlow[o.status].map((next) => (
+                            <option key={next} value={next}>
+                              {next.charAt(0).toUpperCase() + next.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+
+                        {o.status === "cancelled" && (
+                          <span className="text-[10px] text-red-400">
+                            by {o.cancelledBy ?? "unknown"}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="p-3">
+                      <button
+                        onClick={() => toggleDetails(o._id)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        {expandedOrder === o._id ? "Hide" : "View"}
+                      </button>
+                    </td>
                   </tr>
-                )}
-              </Fragment>
-            ))}
+
+                  {/* Expanded order details */}
+                  {expandedOrder === o._id && (
+                    <tr className="bg-black/30">
+                      <td colSpan={7} className="p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Items */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                              Order Items
+                            </h3>
+                            <div className="space-y-2">
+                              {o.items?.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex items-center gap-3 border-b border-white/5 pb-2 last:border-0"
+                                >
+                                  {item.image && (
+                                    <img
+                                      src={item.image}
+                                      alt={item.name}
+                                      className="w-10 h-10 rounded bg-white/5 object-contain p-1"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm text-gray-200 truncate">
+                                      {item.name}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      Qty: {item.quantity}
+                                    </p>
+                                  </div>
+                                  <span className="text-sm text-primary font-medium tabular-nums">
+                                    ₹
+                                    {(
+                                      item.price * item.quantity
+                                    ).toLocaleString("en-IN")}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-4 space-y-1 text-sm text-gray-400">
+                              <div className="flex justify-between">
+                                <span>Items Total</span>
+                                <span>
+                                  ₹{itemsTotal.toLocaleString("en-IN")}
+                                </span>
+                              </div>
+
+                              <div className="flex justify-between">
+                                <span>Shipping</span>
+                                <span>
+                                  {shipping === 0 ? "Free" : `₹${shipping}`}
+                                </span>
+                              </div>
+
+                              {cod > 0 && (
+                                <div className="flex justify-between">
+                                  <span>COD Fee</span>
+                                  <span>₹{cod}</span>
+                                </div>
+                              )}
+
+                              <div className="flex justify-between font-semibold text-white pt-2 border-t border-white/10">
+                                <span>Total</span>
+                                <span>₹{total.toLocaleString("en-IN")}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Shipping address */}
+                          <div>
+                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                              Shipping Address
+                            </h3>
+                            {o.shippingAddress ? (
+                              <div className="text-sm text-gray-300 space-y-1 bg-white/[0.02] rounded-lg p-3 border border-white/5">
+                                <p className="font-medium text-white">
+                                  {o.shippingAddress.fullName}
+                                </p>
+                                <p>{o.shippingAddress.address}</p>
+                                <p>
+                                  {o.shippingAddress.city} –{" "}
+                                  {o.shippingAddress.pincode}
+                                </p>
+                                <p className="text-gray-500">
+                                  Mobile: {o.shippingAddress.mobileNumber}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-gray-500">No address found</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
 
             {orders.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-gray-400">
+                <td colSpan={7} className="p-6 text-center text-gray-500">
                   No orders found
                 </td>
               </tr>
@@ -374,75 +477,148 @@ const Orders = () => {
         </table>
       </div>
 
-      {/*  MOBILE */}
+      {/* MOBILE CARDS */}
       <div className="md:hidden space-y-4">
-        {filteredOrders.map((o) => (
+        {orders.map((o) => (
           <div
-            key={o.id}
-            className="bg-[#0b0b0b] border border-white/10 rounded-xl p-4"
+            key={o._id}
+            className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-4"
           >
             <div className="flex justify-between items-center">
-              <p className="font-semibold">#{o.id}</p>
+              <p className="font-medium font-mono text-xs">
+                #{o.orderNumber}
+              </p>
               <span
-                className={`text-xs px-2 py-1 rounded border ${
-                  statusStyles[o.status]
-                }`}
+                className={`text-[10px] px-2 py-0.5 rounded-md border font-medium capitalize ${statusStyles[o.status]}`}
               >
                 {o.status}
               </span>
             </div>
 
-            <p className="text-sm text-gray-400 mt-1">{o.customerEmail}</p>
+            <p className="text-sm text-gray-200 mt-2">
+              {o.user?.username ?? "Unknown"}
+            </p>
+            <p className="text-xs text-gray-500">{o.user?.email ?? ""}</p>
 
-            <div className="mt-3 text-sm space-y-1">
+            <div className="mt-3 text-sm space-y-1 text-gray-400">
               <p>Items: {o.items?.length || 0}</p>
-              <p>Date: {new Date(o.date).toLocaleDateString()}</p>
-              <p className="font-medium">
-                ₹{Number(o.totalAmount || 0).toLocaleString("en-IN")}
+              <p>Date: {formatDate(o.createdAt)}</p>
+              <p className="font-semibold text-primary">
+                ₹{total?.toLocaleString("en-IN")}
               </p>
-              <p className="capitalize">Payment: {o.paymentMethod || "UPI"}</p>
+              <div className="flex items-center gap-2">
+                <span className="capitalize text-gray-300">
+                  {o.paymentMethod}
+                </span>
+
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-md ${
+                    o.isPaid
+                      ? "bg-green-500/10 text-green-400"
+                      : "bg-red-500/10 text-red-400"
+                  }`}
+                >
+                  {o.isPaid ? "Paid" : "Unpaid"}
+                </span>
+              </div>
             </div>
 
             <select
               value={o.status}
-              disabled={o.status === "cancelled"}
-              onChange={(e) => requestStatusChange(o, e.target.value)}
-              className={`mt-4 w-full bg-black border border-white/20 rounded px-3 py-2 text-white ${
-                o.status === "cancelled" ? "opacity-50" : "cursor-pointer"
+              disabled={statusFlow[o.status].length === 0}
+              onChange={(e) =>
+                requestStatusChange(o, e.target.value as AdminOrderStatus)
+              }
+              className={`mt-4 w-full bg-black border border-white/20 rounded px-3 py-2 text-white text-sm ${
+                statusFlow[o.status].length === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
               }`}
             >
-              {statusOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              <option value={o.status}>
+                {o.status.charAt(0).toUpperCase() + o.status.slice(1)}
+              </option>
+
+              {statusFlow[o.status].map((next) => (
+                <option key={next} value={next}>
+                  {next.charAt(0).toUpperCase() + next.slice(1)}
                 </option>
               ))}
             </select>
+
             {o.status === "cancelled" && (
-              <p className="text-xs text-red-400 mt-1">
-                Cancelled by {o.cancelledBy || "unknown"}
+              <p className="text-[10px] text-red-400 mt-1">
+                Cancelled by {o.cancelledBy ?? "unknown"}
               </p>
-            )}
-            {o.cancelledAt && (
-              <span className="text-xs text-gray-500">
-                {new Date(o.cancelledAt).toLocaleString("en-IN")}
-              </span>
             )}
           </div>
         ))}
 
-        {filteredOrders.length === 0 && (
-          <p className="text-center text-gray-400">No orders found</p>
+        {orders.length === 0 && (
+          <p className="text-center text-gray-500">No orders found</p>
         )}
       </div>
 
-      {/*  CONFIRM  */}
+      {pages > 1 && (
+        <div className="relative mt-6 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            {/* Prev */}
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
+              className="px-3 py-1.5 rounded border border-white/20 text-sm disabled:opacity-40 hover:border-primary transition"
+            >
+              Prev
+            </button>
+
+            {/* Page Numbers */}
+            {getPageNumbers().map((p, i) =>
+              p === "..." ? (
+                <span key={`dots-${i}`} className="px-2 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={`page-${p}-${i}`}
+                  onClick={() => setPage(p)}
+                  className={`px-3 py-1.5 rounded text-sm transition ${
+                    p === page
+                      ? "bg-primary text-black"
+                      : "border border-white/20 hover:border-primary"
+                  }`}
+                >
+                  {p}
+                </button>
+              ),
+            )}
+
+            {/* Next */}
+            <button
+              onClick={() => setPage((p) => Math.min(p + 1, pages))}
+              disabled={page === pages}
+              className="px-3 py-1.5 rounded border border-white/20 text-sm disabled:opacity-40 hover:border-primary transition"
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Right side button */}
+          <div className="absolute right-0">{/* your other button */}</div>
+        </div>
+      )}
+
+      {/* CONFIRM MODAL */}
       <ConfirmModal
         open={confirmOpen}
         title="Change order status?"
-        message={`Change status to "${nextStatus}"?`}
+        message={`Update this order to "${nextStatus}"?`}
         confirmText="Update"
+        danger={nextStatus === "cancelled"}
         onConfirm={confirmStatusChange}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setSelectedOrder(null);
+        }}
       />
     </div>
   );

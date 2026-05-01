@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true, trim: true },
     brand: String,
     category: String,
 
@@ -9,7 +9,12 @@ const productSchema = new mongoose.Schema({
 
     description: String,
 
-    images: [String],
+    images: [
+        {
+            url: String,
+            public_id: String,
+        }
+    ],
 
     countInStock: {
         type: Number,
@@ -23,7 +28,7 @@ const productSchema = new mongoose.Schema({
     featured: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
 
-    sku: { type: String},
+    sku: { type: String },
 
     specs: { type: Object },
 

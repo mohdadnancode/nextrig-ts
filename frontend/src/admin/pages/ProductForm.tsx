@@ -3,125 +3,220 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/client";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
-import type { Product } from "../../types/product";
+import axios from "axios";
 
-const emptyProduct: Product = {
-  name: "",
-  brand: "",
-  category: "",
-  price: 0,
-  description: "",
-  image: "",
-  featured: false,
+type ProductFormState = {
+  name: string;
+  brand: string;
+  category: string;
+  price: string;
+  countInStock: string;
+  description: string;
+  featured: boolean;
 };
 
 const ProductForm = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState<Product>(emptyProduct);
+
+  const [form, setForm] = useState<ProductFormState>({
+    name: "",
+    brand: "",
+    category: "",
+    price: "",
+    countInStock: "",
+    description: "",
+    featured: false,
+  });
+
+  type ImageType = {
+    url: string;
+    public_id: string;
+  };
+
+  const [images, setImages] = useState<File[]>([]);
+  const [preview, setPreview] = useState<ImageType[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [brands, setBrands] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const [newCategory, setNewCategory] = useState("");
+  const [newBrand, setNewBrand] = useState("");
+
+  // 🔹 Load product (EDIT mode)
   useEffect(() => {
     if (!id) return;
 
-    api
-      .get(`/products/${id}`)
-      .then((res) => setForm(res.data))
-      .catch(() => toast.error("Failed to load product"));
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/${id}`);
+        const p = res.data;
+
+        setForm({
+          name: p.name,
+          brand: p.brand,
+          category: p.category,
+          price: p.price,
+          countInStock: p.countInStock,
+          description: p.description,
+          featured: p.featured,
+        });
+
+        // Normalize images: old products may have plain strings instead of {url, public_id} objects
+        const normalizedImages = (p.images || []).map((img: string | { url: string; public_id: string }) =>
+          typeof img === "string"
+            ? { url: img, public_id: `legacy-${img}` }
+            : img
+        );
+        setPreview(normalizedImages);
+      } catch {
+        toast.error("Failed to load product");
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get("/products/meta");
+        setBrands(res.data.brands.filter((b: string) => b !== "All"));
+        setCategories(res.data.categories.filter((c: string) => c !== "All"));
+      } catch {
+        toast.error("Failed to load options");
+      }
+    };
+
+    fetchMeta();
+  }, []);
+
+  // 🔹 Handle input
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const target = e.target;
-
-    const name = target.name;
-
-    let value: string | boolean | number;
-
-    if (target instanceof HTMLInputElement && target.type === "checkbox") {
-      value = target.checked;
-    } else if (name === "price") {
-      value = Number(target.value);
-    } else {
-      value = target.value;
-    }
+    const { name, value, type } = e.target;
 
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  // 🔹 Handle image upload
+  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    if (preview.length + files.length > 6) {
+      toast.error("Max 6 images allowed");
+      return;
+    }
+
+    setImages((prev) => [...prev, ...files]);
+
+    const previews = files.map((file) => ({
+      url: URL.createObjectURL(file),
+      public_id: "temp-" + Math.random(),
+    }));
+
+    setPreview((prev) => [...prev, ...previews]);
+  };
+
+  useEffect(() => {
+    return () => {
+      preview.forEach((img) => {
+        if (img.public_id.startsWith("temp-")) {
+          URL.revokeObjectURL(img.url);
+        }
+      });
+    };
+  }, [preview]);
+
+  const handleDeleteImage = async (img: ImageType) => {
+    try {
+      if (img.public_id.startsWith("temp-")) {
+        const idx = preview.findIndex(p => p.public_id === img.public_id);
+        const existingCount = preview.filter(p => !p.public_id.startsWith("temp-")).length;
+        setPreview(prev => prev.filter(p => p.public_id !== img.public_id));
+        setImages(prev => prev.filter((_, i) => i !== idx - existingCount));
+        return;
+      }
+
+      await api.patch(`/products/${id}/image`, {
+        public_id: img.public_id,
+      });
+
+      setPreview((prev) => prev.filter((p) => p.public_id !== img.public_id));
+
+      toast.success("Image removed");
+    } catch {
+      toast.error("Failed to remove image");
+    }
+  };
+
+  // 🔹 Submit
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!form.name || !form.brand || !form.category || !form.price) {
-      toast.error("Please fill all required fields");
+    if (
+      !form.name ||
+      !form.brand ||
+      !form.category ||
+      !form.price ||
+      form.countInStock === ""
+    ) {
+      toast.error("Fill all required fields");
       return;
     }
 
     setLoading(true);
 
     try {
-      const { data: products } = await api.get<Product[]>("/products");
+      const formData = new FormData();
 
-      const duplicate = products.find(
-        (p: Product) =>
-          p.name.toLowerCase() === form.name.toLowerCase() && p.id !== id, // allow same name when editing same product
-      );
+      Object.entries(form).forEach(([key, value]) => {
+        if (key === "price" || key === "countInStock") {
+          formData.append(key, String(Number(value)));
+        } else {
+          formData.append(key, String(value));
+        }
+      });
 
-      if (duplicate) {
-        toast.error("Product with this name already exists");
-        setLoading(false);
-        return;
-      }
+      images.forEach((img) => {
+        formData.append("images", img);
+      });
 
       if (id) {
-        // EDIT
-        await api.patch(`/products/${id}`, {
-          ...form,
-          updatedAt: new Date().toISOString(),
-        });
-
-        toast.success("Product updated successfully");
+        await api.put(`/products/${id}`, formData);
+        toast.success("Product updated");
       } else {
-        // ADD
-        const maxId = products.length
-          ? Math.max(...products.map((p) => Number(p.id)))
-          : 0;
-
-        const newProduct = {
-          ...form,
-          id: String(maxId + 1),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        await api.post("/products", newProduct);
-        toast.success("Product added successfully");
+        await api.post("/products", formData);
+        toast.success("Product created");
       }
 
       navigate("/admin/products");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save product");
+    } catch (err: unknown) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || err.message
+        : "Failed to save product";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          type="button"
           onClick={() => navigate("/admin/products")}
-          className="flex items-center gap-1 text-sm text-gray-400 hover:text-primary"
+          className="text-gray-400 hover:text-[#76b900]"
         >
-          <ArrowLeft size={16} />
-          Back to Products
+          <ArrowLeft />
         </button>
 
         <h1 className="text-2xl font-bold">
@@ -132,97 +227,165 @@ const ProductForm = () => {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="bg-[#0b0b0b] border border-[#76b900]/20 rounded-xl p-6 grid gap-4"
       >
-        <div>
-          <label className="text-sm text-gray-400">Product Name *</label>
+        <input
+          name="name"
+          placeholder="Product Name"
+          value={form.name}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <select
+          value={form.brand}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, brand: e.target.value }))
+          }
+          className="input"
+        >
+          <option value="">Select Brand</option>
+          {brands.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex gap-2">
           <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className="input mt-1"
+            placeholder="Add new brand"
+            value={newBrand}
+            onChange={(e) => setNewBrand(e.target.value)}
+            className="input flex-1"
           />
+          <button
+            type="button"
+            onClick={() => {
+              const value = newBrand.trim();
+              if (!value) return;
+
+              if (brands.includes(value)) {
+                toast.error("Brand already exists");
+                return;
+              }
+
+              setBrands((prev) => [...prev, value]);
+              setForm((prev) => ({ ...prev, brand: value }));
+              setNewBrand("");
+            }}
+            className="px-3 bg-[#76b900] text-black rounded"
+          >
+            Add
+          </button>
         </div>
 
-        <div>
-          <label className="text-sm text-gray-400">Brand *</label>
+        <select
+          value={form.category}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, category: e.target.value }))
+          }
+          className="input"
+        >
+          <option value="">Select Category</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex gap-2">
           <input
-            name="brand"
-            value={form.brand}
-            onChange={handleChange}
-            className="input mt-1"
+            placeholder="Add new category"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            className="input flex-1"
           />
+          <button
+            type="button"
+            onClick={() => {
+              const value = newCategory.trim();
+              if (!value) return;
+
+              if (categories.includes(value)) {
+                toast.error("Category already exists");
+                return;
+              }
+
+              setCategories((prev) => [...prev, value]);
+              setForm((prev) => ({ ...prev, category: value }));
+              setNewCategory("");
+            }}
+            className="px-3 bg-[#76b900] text-black rounded"
+          >
+            Add
+          </button>
         </div>
 
-        <div>
-          <label className="text-sm text-gray-400">Category *</label>
-          <input
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="input mt-1"
-          />
+        <input
+          name="price"
+          type="number"
+          placeholder="Price"
+          value={form.price}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <input
+          name="countInStock"
+          type="number"
+          placeholder="Stock"
+          value={form.countInStock}
+          onChange={handleChange}
+          className="input"
+        />
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+          className="input"
+        />
+
+        {/* Image Upload */}
+        <input type="file" multiple accept="image/*" onChange={handleImages} className="input" />
+
+        {/* Preview */}
+        <div className="flex gap-2 flex-wrap">
+          {preview.map((img, i) => (
+            <div key={i} className="relative">
+              <img src={img.url} className="w-20 h-20 object-cover rounded" />
+
+              <button
+                type="button"
+                onClick={() => handleDeleteImage(img)}
+                className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 rounded"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </div>
 
-        <div>
-          <label className="text-sm text-gray-400">Price *</label>
-          <input
-            name="price"
-            type="number"
-            value={form.price}
-            onChange={handleChange}
-            className="input mt-1"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="text-sm text-gray-400">Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={3}
-            className="input mt-1"
-          />
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="text-sm text-gray-400">Image URL</label>
-          <input
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            className="input mt-1"
-          />
-        </div>
-
-        <label className="flex items-center gap-2 md:col-span-2">
+        <label className="flex items-center gap-2">
           <input
             type="checkbox"
             name="featured"
             checked={form.featured}
             onChange={handleChange}
           />
-          Featured Product
+          Featured
         </label>
 
-        <div className="md:col-span-2 flex gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/admin/products")}
-            className="flex-1 border border-white/10 text-gray-300 py-2 rounded hover:border-[#76b900]"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-[#76b900] text-black py-2 rounded disabled:opacity-60"
-          >
-            {loading ? "Saving..." : "Save Product"}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-[#76b900] text-black py-2 rounded"
+        >
+          {loading ? "Saving..." : "Save Product"}
+        </button>
       </form>
     </div>
   );

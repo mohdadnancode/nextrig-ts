@@ -14,7 +14,7 @@ export type AuthContextType = {
     username: string;
     email: string;
     password: string;
-  }) => Promise<{ success: boolean; email?: string }>;
+  }) => Promise<{ success: boolean; email?: string; message?: string; field?: string; }>;
   verifyOTP: (email: string, otp: string) => Promise<{ success: boolean }>;
   resendOTP: (email: string) => Promise<{ success: boolean }>;
   logout: () => void;

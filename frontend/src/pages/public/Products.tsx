@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import api from "../../api/client";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product } from "../../types/product";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 /* ------------------ Constants ------------------ */
 const CATEGORIES = [
@@ -71,6 +72,8 @@ function Products(): JSX.Element {
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchingProductsRef = useRef(false);
+  const productsRequestIdRef = useRef(0);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -82,8 +85,12 @@ function Products(): JSX.Element {
 
   /* ------------------ Fetch Products ------------------ */
   useEffect(() => {
+    const requestId = productsRequestIdRef.current + 1;
+    productsRequestIdRef.current = requestId;
+
     const fetchProducts = async () => {
-      if(loadingMore) return;
+      fetchingProductsRef.current = true;
+
       try {
         if (page === 1) setLoading(true);
         else setLoadingMore(true);
@@ -101,33 +108,39 @@ function Products(): JSX.Element {
 
         const newProducts: Product[] = res.data.products;
 
+        if (requestId !== productsRequestIdRef.current) return;
+
         setProducts((prev) =>
           page === 1
             ? newProducts
             : [
-                ...prev,
-                ...newProducts.filter(
-                  (p) => !prev.some((x) => x._id === p._id),
-                ),
-              ],
+              ...prev,
+              ...newProducts.filter(
+                (p) => !prev.some((x) => x._id === p._id),
+              ),
+            ],
         );
 
         setHasNextPage(res.data.pagination.hasNextPage);
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        if (requestId === productsRequestIdRef.current) {
+          fetchingProductsRef.current = false;
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     };
 
     fetchProducts();
-  }, [page, search, category, brand, sortOrder, loadingMore]);
+  }, [page, search, category, brand, sortOrder]);
 
   /* ------------------ Reset page on filter change ------------------ */
   useEffect(() => {
     setPage(1);
     setProducts([]);
+    setHasNextPage(true);
   }, [search, category, brand, sortOrder]);
 
   /* ------------------ URL Category Sync ------------------ */
@@ -176,7 +189,14 @@ function Products(): JSX.Element {
       (entries) => {
         const entry = entries[0];
 
-        if (entry.isIntersecting && hasNextPage && !loadingMore) {
+        if (
+          entry.isIntersecting &&
+          hasNextPage &&
+          !loading &&
+          !loadingMore &&
+          !fetchingProductsRef.current
+        ) {
+          fetchingProductsRef.current = true;
           setPage((prev) => prev + 1);
         }
       },
@@ -191,7 +211,7 @@ function Products(): JSX.Element {
     return () => {
       observer.unobserve(node);
     };
-  }, [hasNextPage, loadingMore]);
+  }, [hasNextPage, loading, loadingMore, products.length]);
 
   /* ------------------ Event Handlers ------------------ */
   const handleSearch = () => {
@@ -310,9 +330,9 @@ function Products(): JSX.Element {
                         }}
                         className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-white/5 cursor-pointer transition"
                       >
-                        {item.images?.[0] && (
+                        {getImageUrl(item.images?.[0]) && (
                           <img
-                            src={item.images[0]}
+                            src={getImageUrl(item.images?.[0])}
                             alt={item.name}
                             className="w-10 h-10 object-cover rounded"
                           />
@@ -401,9 +421,9 @@ function Products(): JSX.Element {
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     layout
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="group"
+                    className="group h-full"
                   >
-                    <div className="rounded-xl overflow-hidden transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(118,185,0,0.6)]">
+                    <div className="h-full rounded-xl overflow-hidden transition-shadow duration-300 group-hover:shadow-[0_0_20px_rgba(118,185,0,0.6)]">
                       <ProductCard product={product} />
                     </div>
                   </motion.div>
@@ -415,9 +435,9 @@ function Products(): JSX.Element {
             {hasNextPage && (
               <div
                 ref={loadMoreRef}
-                className="h-40 flex items-center justify-center text-gray-500"
+                className="h-24"
+                aria-hidden="true"
               >
-                Loading more trigger...
               </div>
             )}
 

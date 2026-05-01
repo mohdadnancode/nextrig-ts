@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import api from "../../api/client";
+import { getImageUrl } from "../../utils/getImageUrl";
 
 /* ------------------ Types ------------------ */
 
@@ -8,7 +9,7 @@ type Product = {
   _id: string;
   name: string;
   price: number;
-  images: string[];
+  images: (string | { url: string; public_id: string })[];
   category: string;
   featured?: boolean;
 };
@@ -24,11 +25,14 @@ const ProductHighlights = () => {
       try {
         setLoading(true);
 
-        const { data } = await api.get("/products");
+        const { data } = await api.get("/products", { params: { limit: 100 } });
 
         const products = data.products || [];
 
-        const featured = products.sort(() => Math.random() - 0.5).slice(0, 10);
+        const featured = products
+          .filter((p: Product) => p.featured)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 10);
 
         setFeaturedProducts(featured);
       } catch (error) {
@@ -153,7 +157,7 @@ const ProductHighlights = () => {
                 {/* Image */}
                 <div className="relative bg-black/40 aspect-square flex items-center justify-center p-4">
                   <img
-                    src={product.images?.[0]}
+                    src={getImageUrl(product.images?.[0])}
                     alt={product.name}
                     className="object-contain max-h-32 transition-transform duration-300 group-hover:scale-110"
                   />

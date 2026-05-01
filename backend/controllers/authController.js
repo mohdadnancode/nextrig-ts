@@ -32,17 +32,35 @@ export const registerUser = async (req, res) => {
   let createdUser = null;
   try {
     const redis = getRedisClient();
-    const { username, email, password } = req.body;
+    const username = req.body.username.toLowerCase();
+    const { email, password } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      if (!userExists.isVerified) {
+    const existingEmail = await User.findOne({ email });
+
+    if (existingEmail) {
+      if (!existingEmail.isVerified) {
         const otp = generateOTP();
         await redis.set(`otp:${email}`, otp, { EX: 300 });
         await sendOTPEmail(email, otp);
-        return res.status(200).json({ message: "OTP resent to email", email });
+        return res.status(200).json({
+          message: "OTP resent to email",
+          email,
+        });
       }
-      return res.status(400).json({ message: "User already exists" });
+
+      return res.status(400).json({
+        field: "email",
+        message: "Email already exists",
+      });
+    }
+
+    const existingUsername = await User.findOne({ username: username.toLowerCase() });
+
+    if (existingUsername) {
+      return res.status(400).json({
+        field: "username",
+        message: "Username already exists",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,7 +69,7 @@ export const registerUser = async (req, res) => {
     });
 
     const otp = generateOTP();
-    await redis.set(`otp:${email}`, otp, { EX: 300 });
+    await redis.set(`otp:${email}`, otp, { EX: 120 });
     await sendOTPEmail(email, otp);
 
     return res.status(201).json({ message: "OTP sent to email", email });
@@ -146,6 +164,12 @@ export const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "Account is blocked by admin",
+      });
+    }
+
     const { accessToken, refreshToken } = generateTokens(user);
 
     res.cookie("refreshToken", refreshToken, {
@@ -184,8 +208,8 @@ export const updateUser = async (req, res) => {
 
     // Username — check for duplicates excluding self
     if (req.body.username) {
-      const existing = await User.findOne({ username: req.body.username, _id: { $ne: id } });
-      if (existing) return res.status(400).json({ message: "Username already taken" });
+      const existing = await User.findOne({ username: req.body.username?.toLowerCase(), _id: { $ne: id } });
+      if (existing) return res.status(400).json({ message: "Username already exists" });
       updates.username = req.body.username;
     }
 
@@ -269,6 +293,40 @@ export const updateUser = async (req, res) => {
   }
 };
 
+export const removeProfileImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user._id.toString() !== id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Delete from Cloudinary if public_id exists
+    if (user.profileImage?.public_id) {
+      try {
+        await cloudinary.uploader.destroy(user.profileImage.public_id);
+      } catch (err) {
+        console.warn("Failed to delete Cloudinary image:", err.message);
+      }
+    }
+
+    // Clear profileImage from DB
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $unset: { profileImage: "" } },
+      { new: true }
+    ).select("-password");
+
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("REMOVE PROFILE IMAGE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // GET ME
 export const getMe = async (req, res) => {
   try {
@@ -278,6 +336,7 @@ export const getMe = async (req, res) => {
       .populate("wishlist", "name price images countInStock category");
 
     if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.isBlocked) return res.status(403).json({ message: "User is blocked" })
 
     const cart = user.cart
       .filter((item) => item.product)

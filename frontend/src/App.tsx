@@ -3,6 +3,7 @@ import { Suspense, lazy } from "react";
 
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import PublicRoute from "./auth/PublicRoute";
 import AdminRoutes from "./admin/routes/AdminRoutes";
 
 /* -------- Public -------- */
@@ -50,8 +51,22 @@ const App: React.FC = () => {
           <Route path="/products/:id" element={<ProductDetails />} />
 
           {/* Auth */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
           <Route path="/verify-otp" element={<VerifyOTP />} />
 
           {/* Protected User Routes */}

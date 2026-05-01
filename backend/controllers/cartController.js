@@ -15,9 +15,11 @@ export const getCart = async (req, res) => {
                     _id: item.product._id,
                     name: item.product.name,
                     price: item.product.price,
-                    image: item.product.images?.[0] || "",
+                    image: typeof item.product.images?.[0] === "string"
+                        ? item.product.images[0]
+                        : item.product.images?.[0]?.url || "",
                     quantity: item.quantity,
-                    stock: item.product.countInStock,
+                    countInStock: item.product.countInStock,
                     category: item.product.category
                 };
             })
