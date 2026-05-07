@@ -34,6 +34,8 @@ export type Order = {
   paymentMethod: string;
   paymentDetails?: Record<string, unknown>;
 
+  expiresAt?: string;
+
   isPaid: boolean;
   paidAt?: string;
 

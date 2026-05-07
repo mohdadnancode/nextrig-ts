@@ -99,21 +99,4 @@ const orderSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-orderSchema.pre("save", function (next) {
-    if (!this.itemsTotal) {
-        this.itemsTotal = this.items.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-        );
-    }
-
-    if (this.shippingCharge === undefined) this.shippingCharge = 0;
-    if (this.codFee === undefined) this.codFee = 0;
-
-    this.totalAmount =
-        this.itemsTotal + this.shippingCharge + this.codFee;
-
-    next();
-});
-
 export default mongoose.model("Order", orderSchema);

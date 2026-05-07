@@ -4,6 +4,8 @@ import Product from "../models/productModel.js"
 import razorpay from "../config/razorpay.js";
 import crypto from "crypto";
 import { generateOrderNumber } from "../utils/orderNumber.js";
+import { calculateOrderAmounts } from "../utils/orderCalculation.js";
+
 
 
 // CREATE ORDER
@@ -80,10 +82,12 @@ export const createOrder = async (req, res) => {
         }
 
         // CALCULATE EXTRA CHARGES
-        const shippingCharge = itemsTotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-        const codFee = paymentMethod === "cod" ? COD_FEE : 0;
-
-        const totalAmount = itemsTotal + shippingCharge + codFee;
+        const {
+            itemsTotal: finalItemsTotal,
+            shippingCharge,
+            codFee,
+            totalAmount,
+        } = calculateOrderAmounts(validatedItems, paymentMethod);
 
         const expiresAt =
             paymentMethod === "cod"
@@ -96,7 +100,7 @@ export const createOrder = async (req, res) => {
             user: userId,
             items: validatedItems,
 
-            itemsTotal,
+            itemsTotal: finalItemsTotal,
             shippingCharge,
             codFee,
             totalAmount,
@@ -143,18 +147,17 @@ export const getUserOrders = async (req, res) => {
         // Fix image field for orders that stored [object Object] or empty strings
         const fixed = orders.map(order => {
             const obj = order.toObject();
-            if (!obj.totalAmount) {
-                obj.itemsTotal =
-                    obj.itemsTotal ??
-                    obj.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+            const {
+                itemsTotal,
+                shippingCharge,
+                codFee,
+                totalAmount,
+            } = calculateOrderAmounts(obj.items, obj.paymentMethod);
 
-                obj.shippingCharge = obj.shippingCharge ?? 0;
-                obj.codFee = obj.codFee ?? 0;
-
-                obj.totalAmount =
-                    obj.totalAmount ??
-                    obj.itemsTotal + obj.shippingCharge + obj.codFee;
-            }
+            obj.itemsTotal = obj.itemsTotal ?? itemsTotal;
+            obj.shippingCharge = obj.shippingCharge ?? shippingCharge;
+            obj.codFee = obj.codFee ?? codFee;
+            obj.totalAmount = obj.totalAmount ?? totalAmount;
 
             obj.items = obj.items.map(item => {
                 if (!item.image || item.image === "[object Object]" || typeof item.image !== "string") {
@@ -339,18 +342,48 @@ export const autoCancelUnpaidOrders = async () => {
             paymentMethod: { $ne: "cod" },
             expiresAt: { $lte: now },
             status: "pending",
-        });
+        })
+            .select("_id items")
+            .lean();
 
-        for (const order of orders) {
-
-            order.status = "cancelled";
-            order.cancelledBy = "system";
-            order.cancelledAt = new Date();
-
-            await order.save({ validateBeforeSave: false });;
+        if (!orders.length) {
+            console.log("No expired orders to cancel");
+            return;
         }
 
-        console.log(`Auto-cancelled ${orders.length} unpaid orders`);
+        const bulkOps = [];
+
+        for (const order of orders) {
+            for (const item of order.items) {
+                bulkOps.push({
+                    updateOne: {
+                        filter: { _id: item.product },
+                        update: {
+                            $inc: { countInStock: item.quantity },
+                        },
+                    },
+                });
+            }
+        }
+
+        if (bulkOps.length) {
+            await Product.bulkWrite(bulkOps);
+        }
+
+        const result = await Order.updateMany(
+            { _id: { $in: orders.map(o => o._id) } },
+            {
+                $set: {
+                    status: "cancelled",
+                    cancelledBy: "system",
+                    cancelledAt: now,
+                },
+            }
+        );
+
+        console.log(
+            `Auto-cancelled ${result.modifiedCount} orders and restored stock`
+        );
     } catch (err) {
         console.error("AUTO CANCEL ERROR:", err);
     }

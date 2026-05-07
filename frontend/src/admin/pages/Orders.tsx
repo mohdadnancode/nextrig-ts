@@ -348,10 +348,40 @@ const Orders = () => {
                           ))}
                         </select>
 
+                        {/* EXPIRES SOON */}
+                        {o.status === "pending" &&
+                          !o.isPaid &&
+                          o.paymentMethod !== "cod" &&
+                          o.expiresAt &&
+                          new Date(o.expiresAt).getTime() > Date.now() && (
+                            <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded w-fit">
+                              ⏳ Expires Soon
+                            </span>
+                          )}
+
+                        {/* EXPIRED */}
+                        {o.status === "pending" &&
+                          !o.isPaid &&
+                          o.paymentMethod !== "cod" &&
+                          o.expiresAt &&
+                          new Date(o.expiresAt).getTime() <= Date.now() && (
+                            <span className="text-[10px] text-red-400">
+                              Payment expired
+                            </span>
+                          )}
+
                         {o.status === "cancelled" && (
-                          <span className="text-[10px] text-red-400">
-                            by {o.cancelledBy ?? "unknown"}
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-red-400">
+                              by {o.cancelledBy ?? "unknown"}
+                            </span>
+
+                            {o.cancelledBy === "system" && (
+                              <span className="text-[10px] text-red-500 font-medium">
+                                ⚠ Auto-cancelled
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -432,6 +462,12 @@ const Orders = () => {
                                 <span>Total</span>
                                 <span>₹{total.toLocaleString("en-IN")}</span>
                               </div>
+                              {o.expiresAt && o.status === "pending" && (
+                                <p className="text-sm text-yellow-400 mt-2">
+                                  Expires at:{" "}
+                                  {new Date(o.expiresAt).toLocaleTimeString()}
+                                </p>
+                              )}
                             </div>
                           </div>
 
@@ -485,9 +521,7 @@ const Orders = () => {
             className="bg-[#0b0b0b] border border-white/[0.07] rounded-xl p-4"
           >
             <div className="flex justify-between items-center">
-              <p className="font-medium font-mono text-xs">
-                #{o.orderNumber}
-              </p>
+              <p className="font-medium font-mono text-xs">#{o.orderNumber}</p>
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-md border font-medium capitalize ${statusStyles[o.status]}`}
               >
@@ -547,9 +581,15 @@ const Orders = () => {
             </select>
 
             {o.status === "cancelled" && (
-              <p className="text-[10px] text-red-400 mt-1">
-                Cancelled by {o.cancelledBy ?? "unknown"}
-              </p>
+              <div className="mt-1">
+                <p className="text-[10px] text-red-400">
+                  Cancelled by {o.cancelledBy ?? "unknown"}
+                </p>
+
+                {o.cancelledBy === "system" && (
+                  <p className="text-[10px] text-red-500">⚠ Auto-cancelled</p>
+                )}
+              </div>
             )}
           </div>
         ))}

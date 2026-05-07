@@ -52,6 +52,8 @@ export type AdminOrder = {
   paymentMethod: string;
   paymentDetails?: Record<string, unknown>;
 
+  expiresAt?: string;
+
   isPaid: boolean;
   paidAt?: string;
 

@@ -141,6 +141,19 @@ const MyOrders: React.FC = () => {
     }
   };
 
+  const getTimeLeft = (expiresAt?: string) => {
+    if (!expiresAt) return null;
+
+    const diff = new Date(expiresAt).getTime() - Date.now();
+
+    if (diff <= 0) return "Expired";
+
+    const mins = Math.floor(diff / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+
+    return `${mins}m ${secs}s`;
+  };
+
   const getStatusIcon = (status?: OrderStatus) => {
     switch (status) {
       case "pending":
@@ -532,6 +545,14 @@ const MyOrders: React.FC = () => {
                     </div>
                   </div>
 
+                  {order.expiresAt &&
+                    !order.isPaid &&
+                    order.status === "pending" && (
+                      <p className="text-sm text-yellow-400 mt-2">
+                        ⏳ Expires in: {getTimeLeft(order.expiresAt)}
+                      </p>
+                    )}
+
                   {/* Footer */}
                   <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center">
                     <span className="text-xl font-bold">Order Total:</span>
@@ -546,14 +567,26 @@ const MyOrders: React.FC = () => {
                     </span>
                   </div>
 
-                  {!order.isPaid && order.paymentMethod !== "cod" && (
-                    <button
-                      onClick={() => retryPayment(order)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg mr-3"
-                    >
-                      Retry Payment
-                    </button>
-                  )}
+                  {!order.isPaid &&
+                    order.paymentMethod !== "cod" &&
+                    order.status === "pending" &&
+                    order.expiresAt &&
+                    new Date(order.expiresAt).getTime() > Date.now() && (
+                      <button
+                        onClick={() => retryPayment(order)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg mr-3"
+                      >
+                        Retry Payment
+                      </button>
+                    )}
+
+                  {order.expiresAt &&
+                    new Date(order.expiresAt).getTime() <= Date.now() &&
+                    order.status === "pending" && (
+                      <p className="text-red-400 text-sm mt-2">
+                        Payment expired. Order will be cancelled automatically.
+                      </p>
+                    )}
 
                   {/* Cancel Order Button */}
                   <div className="mt-4 flex justify-end">
