@@ -1,73 +1,178 @@
-# React + TypeScript + Vite
+NextRig
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack modern PC hardware e-commerce platform built using the MERN stack with secure authentication, Razorpay payment integration, admin dashboard, order lifecycle management, inventory handling, and responsive UI.
 
-Currently, two official plugins are available:
+🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## React Compiler
+👤 User Features
+User Registration & Login
+Email OTP Verification
+JWT Authentication
+Protected Routes
+Browse Products
+Product Categories & Search
+Wishlist System
+Shopping Cart
+Buy Now Feature
+Address Management
+Razorpay Online Payments
+Cash on Delivery (COD)
+Order Placement
+Order Tracking
+Order Cancellation
+Responsive UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🛠 Admin Features
+Admin Authentication
+Dashboard Analytics
+Product Management
+Add Product
+Edit Product
+Delete Product
+Upload Multiple Images
+User Management
+Block / Unblock Users
+Order Management
+View Orders
+Search Orders
+Filter Orders
+Sort Orders
+Pagination
+Update Order Status
+Inventory Management
+Revenue Monitoring
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+⚡ Advanced Features
+Secure JWT Authentication
+OTP Verification using Email
+Razorpay Payment Gateway Integration
+Automatic Failed Payment Cancellation
+Automatic Stock Restoration
+Server-side Pagination
+Debounced Search
+Search by Order ID / Username / Email
+Dynamic Shipping Charges
+COD Extra Fee Logic
+Optimized MongoDB Aggregation Queries
+Clean Admin Dashboard UI
+Fully Responsive Design
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+🧠 Order Lifecycle System
+Pending → Shipped → Delivered
+        ↘ Cancelled
+        
+Online Payment Orders
+Created as pending
+Expires automatically after 15 minutes if unpaid
+Auto-cancelled using cron jobs
+Stock restored automatically
+COD Orders
+No expiry timer
+Extra COD handling fee applied
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+🏗 Tech Stack
+Frontend
+React
+TypeScript
+Tailwind CSS
+React Router DOM
+Axios
+React Hot Toast
+Lucide React
+Backend
+Node.js
+Express.js
+MongoDB
+Mongoose
+JWT
+Bcrypt
+Redis
+Node Cron
+Razorpay SDK
+Cloudinary
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+📂 Project Structure
+NextRig/
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── ...
+│
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── utils/
+│   ├── config/
+│   └── ...
+│
+└── README.md
+
+
+🔐 Authentication Flow
+User registers
+OTP sent to email
+User verifies OTP
+JWT token generated
+Protected routes accessible
+
+
+💳 Payment System
+Online Payment
+Razorpay order generated
+Payment verified using signature verification
+Order marked as paid
+Stock reduced after successful payment
+COD
+No online verification
+COD fee added
+Payment marked on delivery
+
+
+📦 Inventory Management
+Stock validation before order creation
+Automatic stock reduction after successful purchase
+Automatic stock restoration on cancellation
+Handles expired unpaid orders
+
+
+🔄 Auto Cancel System
+
+Unpaid online payment orders automatically expire after 15 minutes.
+
+Implemented using:
+
+expiresAt
+node-cron
+MongoDB queries
+Automatic stock recovery
+
+
+📊 Admin Dashboard
+
+Includes:
+
+Total Users
+Total Products
+Total Orders
+Revenue Statistics
+Order Status Overview
+
+
+🔎 Search & Filtering
+
+Admin Orders Page supports:
+
+Search by Order ID
+Search by Username
+Search by Email
+Status Filtering
+Sorting
+Pagination
