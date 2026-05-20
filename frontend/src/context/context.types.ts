@@ -9,7 +9,9 @@ export type AuthContextType = {
   authLoading: boolean;
   authError: string;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean }>;
+  login: (email: string, password: string) => Promise<{
+    message: string; success: boolean 
+}>;
   register: (userData: {
     username: string;
     email: string;
