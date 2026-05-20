@@ -235,7 +235,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsAuthenticated(true);
       await fetchUser(token);
 
-      return { success: true };
+      return { success: true, message: "Login successful" };
     } catch (error: unknown) {
       const msg =
         axios.isAxiosError(error) && error.response
