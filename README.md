@@ -257,7 +257,7 @@ EMAIL_PASS=your_email_password
 ```bash
 # Start backend
 cd backend
-npm run dev
+node server.js
 
 # Start frontend
 cd frontend
