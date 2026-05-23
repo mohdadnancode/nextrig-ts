@@ -333,58 +333,58 @@ export const verifyPayment = async (req, res) => {
 };
 
 // CANCEL UNPAID ORDERS
-export const autoCancelUnpaidOrders = async () => {
-    try {
-        const now = new Date();
+// export const autoCancelUnpaidOrders = async () => {
+//     try {
+//         const now = new Date();
 
-        const orders = await Order.find({
-            isPaid: false,
-            paymentMethod: { $ne: "cod" },
-            expiresAt: { $lte: now },
-            status: "pending",
-        })
-            .select("_id items")
-            .lean();
+//         const orders = await Order.find({
+//             isPaid: false,
+//             paymentMethod: { $ne: "cod" },
+//             expiresAt: { $lte: now },
+//             status: "pending",
+//         })
+//             .select("_id items")
+//             .lean();
 
-        if (!orders.length) {
-            console.log("No expired orders to cancel");
-            return;
-        }
+//         if (!orders.length) {
+//             console.log("No expired orders to cancel");
+//             return;
+//         }
 
-        const bulkOps = [];
+//         const bulkOps = [];
 
-        for (const order of orders) {
-            for (const item of order.items) {
-                bulkOps.push({
-                    updateOne: {
-                        filter: { _id: item.product },
-                        update: {
-                            $inc: { countInStock: item.quantity },
-                        },
-                    },
-                });
-            }
-        }
+//         for (const order of orders) {
+//             for (const item of order.items) {
+//                 bulkOps.push({
+//                     updateOne: {
+//                         filter: { _id: item.product },
+//                         update: {
+//                             $inc: { countInStock: item.quantity },
+//                         },
+//                     },
+//                 });
+//             }
+//         }
 
-        if (bulkOps.length) {
-            await Product.bulkWrite(bulkOps);
-        }
+//         if (bulkOps.length) {
+//             await Product.bulkWrite(bulkOps);
+//         }
 
-        const result = await Order.updateMany(
-            { _id: { $in: orders.map(o => o._id) } },
-            {
-                $set: {
-                    status: "cancelled",
-                    cancelledBy: "system",
-                    cancelledAt: now,
-                },
-            }
-        );
+//         const result = await Order.updateMany(
+//             { _id: { $in: orders.map(o => o._id) } },
+//             {
+//                 $set: {
+//                     status: "cancelled",
+//                     cancelledBy: "system",
+//                     cancelledAt: now,
+//                 },
+//             }
+//         );
 
-        console.log(
-            `Auto-cancelled ${result.modifiedCount} orders and restored stock`
-        );
-    } catch (err) {
-        console.error("AUTO CANCEL ERROR:", err);
-    }
-};
+//         console.log(
+//             `Auto-cancelled ${result.modifiedCount} orders and restored stock`
+//         );
+//     } catch (err) {
+//         console.error("AUTO CANCEL ERROR:", err);
+//     }
+// };
