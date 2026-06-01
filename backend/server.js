@@ -26,19 +26,24 @@ import errorHandler from "./middleware/errorMiddleware.js";
 const app = express();
 app.set("trust proxy", 1);
 
+const normalizeOrigin = (origin) => origin?.replace(/\/$/, "");
+
 const allowedOrigins = [
     "http://localhost:5173",
-    process.env.CLIENT_URL,
+    ...(process.env.CLIENT_URL || "")
+        .split(",")
+        .map((origin) => normalizeOrigin(origin.trim()))
+        .filter(Boolean),
 ];
 
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
 
         if (!origin) {
             return callback(null, true);
         }
 
-        if (allowedOrigins.includes(origin)) {
+        if (allowedOrigins.includes(normalizeOrigin(origin))) {
             return callback(null, true);
         }
 
@@ -47,9 +52,10 @@ app.use(cors({
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-}));
+};
 
-app.options(/.*/, cors());
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
@@ -57,6 +63,10 @@ app.use(morgan("dev"));
 
 app.use(helmet());
 app.use(hpp());
+
+app.get("/api/health", (req, res) => {
+    res.json({ ok: true });
+});
 
 // routes
 app.use("/api/users", userRoutes);
@@ -83,19 +93,15 @@ const startServer = async () => {
         await connectDB();
         console.log("MongoDB connected");
 
-        try {
-            await connectRedis();
-            console.log("Redis connected");
-        } catch (redisErr) {
-            console.error("Redis failed:", redisErr.message);
-        }
+        await connectRedis();
+        console.log("Redis connected");
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
 
     } catch (err) {
-        console.error("MongoDB failed:", err);
+        console.error("Server startup failed:", err);
         process.exit(1);
     }
 };

@@ -9,6 +9,13 @@ import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 import cloudinary from "../config/cloudinary.js";
 
 
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 // REFRESH TOKEN
 export const refreshToken = (req, res) => {
   const token = req.cookies.refreshToken;
@@ -114,12 +121,7 @@ export const verifyOTP = async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens(user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
     res.json({ message: "Email verified successfully", accessToken });
   } catch (err) {
@@ -172,12 +174,7 @@ export const loginUser = async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens(user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
     res.json({ _id: user._id, username: user.username, email: user.email, accessToken });
   } catch (err) {
@@ -188,9 +185,8 @@ export const loginUser = async (req, res) => {
 // Logout
 export const logoutUser = (req, res) => {
   res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    ...refreshCookieOptions,
+    maxAge: undefined,
   });
   res.json({ message: "Logged out" });
 };

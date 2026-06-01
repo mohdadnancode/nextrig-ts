@@ -206,10 +206,12 @@ export const cancelOrder = async (req, res) => {
             return res.status(400).json({ message: "Cannot cancel delivered order" });
         }
 
-        for (const item of order.items) {
-            await Product.findByIdAndUpdate(item.product, {
-                $inc: { countInStock: item.quantity },
-            });
+        if (order.paymentMethod === "cod" || order.isPaid) {
+            for (const item of order.items) {
+                await Product.findByIdAndUpdate(item.product, {
+                    $inc: { countInStock: item.quantity },
+                });
+            }
         }
 
         order.status = "cancelled";

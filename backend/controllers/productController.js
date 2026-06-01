@@ -63,7 +63,7 @@ export const getProducts = async (req, res) => {
             });
         }
 
-        if (search && process.env.ATLAS_SEARCH_INDEX) {
+        if (search && process.env.ATLAS_SEARCH_INDEX && !req.skipAtlasSearch) {
             return getProductsWithAtlasSearch(req, res);
         }
 
@@ -144,7 +144,7 @@ async function getProductsWithAtlasSearch(req, res) {
             },
         });
 
-        const matchStage = {};
+        const matchStage = { isAvailable: true };
 
         if (category && category !== "All") matchStage.category = category;
         if (brand && brand !== "All") matchStage.brand = brand;
@@ -192,7 +192,8 @@ async function getProductsWithAtlasSearch(req, res) {
             },
         });
     } catch (err) {
-        console.warn("Atlas failed → fallback:", err.message);
+        console.warn("Atlas failed -> fallback:", err.message);
+        req.skipAtlasSearch = true;
         return getProducts(req, res);
     }
 }
@@ -406,7 +407,6 @@ export const deleteProduct = async (req, res) => {
                 cloudinary.uploader.destroy(img.public_id)
             )
         );
-        await Product.findByIdAndDelete(req.params.id);
         res.json({ message: "Product deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });

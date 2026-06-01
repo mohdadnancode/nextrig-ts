@@ -1,4 +1,5 @@
 import express from "express";
+import User from "../models/userModel.js";
 import {
   registerUser,
   verifyOTP,
@@ -20,12 +21,13 @@ import { authLimiter } from "../middleware/rateLimiter.js";
 import { protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/upload.js";
 import validate from "../middleware/validate.js";
+import { registerSchema } from "../validator/authValidator.js";
 
 const router = express.Router();
 
 // Auth
 router.post("/refresh-token", refreshToken);
-router.post("/register", authLimiter, validate(registerUser), registerUser);
+router.post("/register", authLimiter, validate(registerSchema), registerUser);
 router.post("/verify-otp", authLimiter, verifyOTP);
 router.post("/resend-otp", authLimiter, resendOTP);
 router.post("/login", authLimiter, loginUser);

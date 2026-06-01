@@ -318,7 +318,11 @@ export const updateOrderStatus = async (req, res) => {
             });
         }
 
-        if (status === "cancelled" && currentStatus === "pending") {
+        if (
+            status === "cancelled" &&
+            currentStatus === "pending" &&
+            (order.paymentMethod === "cod" || order.isPaid)
+        ) {
             for (const item of order.items) {
                 await Product.findByIdAndUpdate(item.product, {
                     $inc: { countInStock: item.quantity },
