@@ -76,7 +76,7 @@ const ProductHighlights = () => {
     return (
       <div className="bg-[#0d0d0d] text-white py-16 text-center">
         <p className="text-gray-400 text-lg">
-          No featured products available 🚀
+          No featured products available...
         </p>
       </div>
     );
@@ -105,7 +105,7 @@ const ProductHighlights = () => {
           {/* Navigation buttons */}
           <button
             onClick={scrollLeft}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
+            className="hidden sm:flex absolute -left-10 lg:-left-12 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/80 border border-white/30 rounded-full text-primary items-center justify-center shadow-[0_0_16px_rgba(0,0,0,0.55)] hover:bg-white/15 hover:border-[#76b900]/70 hover:shadow-[0_0_14px_rgba(118,185,0,0.45)] transition-all duration-300"
             aria-label="Scroll left"
           >
             <svg
@@ -125,7 +125,7 @@ const ProductHighlights = () => {
 
           <button
             onClick={scrollRight}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-8 h-8 bg-white/10 border border-white/20 rounded-full text-primary items-center justify-center hover:bg-white/20 hover:shadow-[0_0_12px_rgba(118,185,0,0.5)] transition-all duration-300"
+            className="hidden sm:flex absolute -right-10 lg:-right-12 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-black/80 border border-white/30 rounded-full text-primary items-center justify-center shadow-[0_0_16px_rgba(0,0,0,0.55)] hover:bg-white/15 hover:border-[#76b900]/70 hover:shadow-[0_0_14px_rgba(118,185,0,0.45)] transition-all duration-300"
             aria-label="Scroll right"
           >
             <svg
